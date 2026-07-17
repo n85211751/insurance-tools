@@ -242,6 +242,11 @@
   .sticky-bar .item.r .v{color:#E9B7A9;}
   .sticky-bar .item.a .v{color:#A9D4C6;}
   .sticky-bar .item.g .v{color:var(--gold-soft);}
+  .sticky-save-btn{
+    background:var(--gold);color:#fff;border:none;border-radius:20px;
+    padding:9px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+    white-space:nowrap;flex-shrink:0;
+  }
 
   .print-btn-wrap{text-align:center;margin-top:22px;}
   .print-btn{
@@ -255,7 +260,7 @@
   #printReport{display:none;}
   @media print{
     body *{visibility:hidden;}
-    .sticky-bar, .child-count-picker, .add-btn, .dyn-row button.rm, .print-btn-wrap, .client-manager{display:none !important;}
+    .sticky-bar, .child-count-picker, .add-btn, .dyn-row button.rm, .print-btn-wrap, .client-manager, .sticky-save-btn{display:none !important;}
     #printReport, #printReport *{visibility:visible;}
     #printReport{display:block;position:absolute;top:0;left:0;width:100%;padding:20px;}
   }
@@ -292,8 +297,9 @@
       </div>
       <button class="mgr-btn" id="loadBtn" type="button">讀取</button>
       <button class="mgr-btn del" id="deleteBtn" type="button">刪除</button>
-      <button class="mgr-btn save" id="saveBtn" type="button">儲存此客戶資料</button>
+      <button class="mgr-btn save" id="saveBtn" type="button">立即儲存</button>
     </div>
+    <div class="hint">填好「要保人姓名」後，之後所有欄位會自動儲存，不用手動按存檔。</div>
     <div class="save-msg" id="saveMsg"></div>
   </div>
 </div>
@@ -487,6 +493,7 @@
   <div class="item r"><div class="l">家庭責任</div><div class="v" id="stickyResp">0</div></div>
   <div class="item a"><div class="l">現有資產</div><div class="v" id="stickyAsset">0</div></div>
   <div class="item g"><div class="l">保障缺口</div><div class="v" id="stickyGap">0</div></div>
+  <button class="sticky-save-btn" id="saveBtnBottom" type="button">💾 儲存</button>
 </div>
 
 <!-- Printable report, populated by JS before print -->
@@ -499,6 +506,7 @@
   const fmt = n => 'NT$ ' + Math.round(n).toLocaleString('zh-TW');
   const fmtWan = n => (n/10000).toLocaleString('zh-TW', {maximumFractionDigits:1}) + ' 萬';
   const STORE_KEY = 'familyGapClients_v1';
+  let autoSaveTimer;
 
   // ================= children =================
   let childCount = 2;
@@ -769,13 +777,18 @@
       angle = Math.max(-18, Math.min(18, ratio * 18));
     }
     $('beamGroup').style.transform = `rotate(${angle}deg)`;
+
+    scheduleAutoSave();
   }
 
   ['spouseAge','spouseLE','spouseMonthly','parentsYears','parentsMonthly','unexpiredPremium',
    'depositTwd','depositUsd','savingsTwd','savingsUsd','bondInv','bondHigh','assetStock','assetFund','usdRate','otherAssetValue']
    .forEach(id => $(id).addEventListener('input', calc));
-  $('spouseName').addEventListener('input', ()=>{});
+  $('spouseName').addEventListener('input', calc);
   $('otherAssetName').addEventListener('input', calc);
+  $('clientName').addEventListener('input', scheduleAutoSave);
+  $('advisorName').addEventListener('input', scheduleAutoSave);
+  $('reportDate').addEventListener('change', scheduleAutoSave);
 
   renderChildPicker();
   renderChildren();
@@ -886,20 +899,51 @@
     });
     if(store[current]) sel.value = current;
   }
-  function flashMsg(msg){
+  function flashMsg(msg, persist){
     $('saveMsg').textContent = msg;
+    if(persist) return;
     setTimeout(()=>{ if($('saveMsg').textContent===msg) $('saveMsg').textContent=''; }, 3000);
   }
 
-  $('saveBtn').addEventListener('click', ()=>{
+  function doAutoSave(){
     const name = $('clientName').value.trim();
-    if(!name){ flashMsg('請先填寫「要保人 / 被保險人姓名」再儲存'); return; }
+    if(!name) return;
     const store = loadStore();
     store[name] = gatherState();
     saveStore(store);
     refreshClientSelect();
     $('clientSelect').value = name;
-    flashMsg(`已儲存「${name}」的資料`);
+    const t = new Date().toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    flashMsg(`已自動儲存「${name}」的資料（${t}）`, true);
+  }
+  function scheduleAutoSave(){
+    const name = $('clientName') ? $('clientName').value.trim() : '';
+    if(!name) return;
+    clearTimeout(autoSaveTimer);
+    $('saveMsg').textContent = '儲存中…';
+    autoSaveTimer = setTimeout(doAutoSave, 700);
+  }
+
+  $('saveBtn').addEventListener('click', ()=>{
+    const name = $('clientName').value.trim();
+    if(!name){ flashMsg('請先填寫「要保人 / 被保險人姓名」再儲存'); return; }
+    clearTimeout(autoSaveTimer);
+    doAutoSave();
+  });
+  $('saveBtnBottom').addEventListener('click', ()=>{
+    const name = $('clientName').value.trim();
+    const btn = $('saveBtnBottom');
+    if(!name){
+      const orig = btn.textContent;
+      btn.textContent = '⚠️ 請先填姓名';
+      setTimeout(()=>{ btn.textContent = orig; }, 2000);
+      return;
+    }
+    clearTimeout(autoSaveTimer);
+    doAutoSave();
+    const orig = btn.textContent;
+    btn.textContent = '✓ 已儲存';
+    setTimeout(()=>{ btn.textContent = orig; }, 1800);
   });
 
   $('loadBtn').addEventListener('click', ()=>{
