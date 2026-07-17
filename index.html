@@ -88,6 +88,12 @@
   }
   .field input:focus, .field select:focus{outline:2px solid var(--gold);outline-offset:1px;}
 
+  .new-client-btn{
+    display:block;width:100%;margin-bottom:14px;
+    background:var(--navy);color:#fff;border:none;border-radius:8px;
+    padding:13px 14px;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;
+    letter-spacing:.02em;
+  }
   .client-manager{
     margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);
     display:flex;gap:10px;flex-wrap:wrap;align-items:end;
@@ -285,6 +291,7 @@
 
 <div class="meta-card">
   <div class="meta-inner">
+    <button class="new-client-btn" id="newClientBtn" type="button">＋ 開始新客戶（清空表單）</button>
     <div class="meta-grid">
       <div class="field"><label>要保人 / 被保險人姓名</label><input id="clientName" placeholder="例：王先生"></div>
       <div class="field"><label>顧問姓名</label><input id="advisorName" placeholder="例：吳金津"></div>
@@ -964,6 +971,66 @@
     saveStore(store);
     refreshClientSelect();
     flashMsg(`已刪除「${name}」的資料`);
+  });
+
+  function resetForm(){
+    $('clientName').value = '';
+    $('reportDate').value = new Date().toISOString().slice(0,10);
+    $('spouseName').value = '';
+    $('spouseAge').value = 40;
+    $('spouseLE').value = 85;
+    $('spouseMonthly').value = 30000;
+    $('parentsYears').value = 0;
+    $('parentsMonthly').value = 0;
+
+    childCount = 2;
+    renderChildPicker();
+    const list = $('childrenList');
+    list.innerHTML = '';
+    for(let i=0;i<childCount;i++){
+      const card = document.createElement('div');
+      card.className = 'card child-card';
+      card.dataset.idx = i;
+      card.innerHTML = childCardTemplate(i, {});
+      list.appendChild(card);
+      card.querySelectorAll('input').forEach(inp=> inp.addEventListener('input', calc));
+    }
+
+    loanRows = [
+      {name:'不動產貸款', amount:0, rate:0},
+      {name:'車貸', amount:0, rate:0},
+      {name:'信用貸款', amount:0, rate:0},
+    ];
+    renderLoans();
+
+    $('unexpiredPremium').value = 0;
+
+    $('depositTwd').value = 0; $('depositUsd').value = 0;
+    $('savingsTwd').value = 0; $('savingsUsd').value = 0;
+    $('bondInv').value = 0; $('bondHigh').value = 0;
+    $('assetStock').value = 0; $('assetFund').value = 0;
+    $('usdRate').value = 32;
+
+    reRows = [{name:'自住房', value:0}];
+    renderRE();
+
+    $('otherAssetName').value = '';
+    $('otherAssetValue').value = 0;
+
+    $('clientSelect').value = '';
+    calc();
+    window.scrollTo({top:0, behavior:'smooth'});
+    flashMsg('已清空，可以開始輸入新客戶的資料');
+  }
+
+  $('newClientBtn').addEventListener('click', ()=>{
+    const name = $('clientName').value.trim();
+    if(name){
+      clearTimeout(autoSaveTimer);
+      doAutoSave();
+    }
+    const proceed = window.confirm('確定要清空畫面，開始輸入新客戶嗎？\n\n（目前這位客戶的資料已自動儲存，不會遺失，之後可以從「已儲存的客戶資料」讀取回來）');
+    if(proceed) resetForm();
   });
 
   refreshClientSelect();
