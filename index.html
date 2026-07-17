@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>家庭責任缺口分析｜保單健診工具</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F2E9;
+    --paper-2:#EFE9DC;
+    --ink:#20262F;
+    --ink-soft:#5B6470;
+    --navy:#12283F;
+    --gold:#B8925A;
+    --gold-soft:#DCC79A;
+    --resp:#8B4A3F;
+    --resp-soft:#F1E1DC;
+    --asset:#3F6E64;
+    --asset-soft:#DEEAE5;
+    --line: rgba(18,40,63,0.14);
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Noto Sans TC', sans-serif;
+    padding-bottom:110px;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:28px 20px 40px;}
+  header.top{
+    text-align:center;
+    padding:34px 20px 26px;
+    background:linear-gradient(180deg, var(--navy) 0%, #0E1F31 100%);
+    color:#F3EEE2;
+    position:relative;
+  }
+  header.top .eyebrow{
+    letter-spacing:.32em;
+    font-size:11px;
+    color:var(--gold-soft);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  header.top h1{
+    font-family:'Noto Serif TC', serif;
+    font-weight:700;
+    font-size:clamp(24px,5vw,34px);
+    margin:0 0 8px;
+    letter-spacing:.02em;
+  }
+  header.top p.sub{
+    margin:0;
+    font-size:14px;
+    color:#C7CEDA;
+    font-weight:400;
+  }
+  header.top .rule{
+    width:56px;height:2px;background:var(--gold);
+    margin:16px auto 0;
+  }
+
+  .meta-card{
+    max-width:920px;margin:-22px auto 0;padding:0 20px;
+  }
+  .meta-inner{
+    background:var(--card);
+    border-radius:10px;
+    box-shadow:0 10px 30px rgba(18,40,63,0.10);
+    padding:18px 20px;
+  }
+  .meta-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+  }
+  @media (max-width:640px){ .meta-grid{grid-template-columns:1fr;} }
+  .field label{
+    display:block;font-size:12px;color:var(--ink-soft);margin-bottom:5px;font-weight:600;
+  }
+  .field input, .field select{
+    width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:6px;
+    font-family:inherit;font-size:14px;background:#FCFAF5;color:var(--ink);
+  }
+  .field input:focus, .field select:focus{outline:2px solid var(--gold);outline-offset:1px;}
+
+  .client-manager{
+    margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);
+    display:flex;gap:10px;flex-wrap:wrap;align-items:end;
+  }
+  .client-manager .field{flex:1;min-width:180px;}
+  .mgr-btn{
+    padding:9px 16px;border-radius:6px;border:1px solid var(--line);background:#fff;
+    font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;
+  }
+  .mgr-btn.save{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .mgr-btn.del{color:var(--resp);border-color:var(--resp-soft);}
+  .save-msg{font-size:12px;color:var(--asset);margin-top:8px;min-height:16px;}
+
+  section.block{
+    margin-top:30px;
+  }
+  .block-head{
+    display:flex;align-items:baseline;gap:10px;margin-bottom:14px;padding-bottom:10px;
+    border-bottom:2px solid var(--line);
+  }
+  .block-head .tag{
+    font-family:'Noto Serif TC',serif;font-weight:700;font-size:13px;
+    color:#fff;background:var(--navy);padding:3px 10px;border-radius:3px;letter-spacing:.05em;
+  }
+  .block-head h2{
+    font-family:'Noto Serif TC',serif;font-size:20px;margin:0;font-weight:600;color:var(--navy);
+  }
+  .block-head .note{margin-left:auto;font-size:12px;color:var(--ink-soft);}
+  .block.responsibility .block-head .tag{background:var(--resp);}
+  .block.responsibility .block-head h2{color:var(--resp);}
+  .block.assets .block-head .tag{background:var(--asset);}
+  .block.assets .block-head h2{color:var(--asset);}
+
+  .card{
+    background:var(--card);border-radius:10px;border:1px solid var(--line);
+    padding:18px 18px 16px;margin-bottom:14px;
+    box-shadow:0 2px 8px rgba(18,40,63,0.04);
+  }
+  .card h3{
+    font-size:15px;margin:0 0 12px;font-weight:700;color:var(--ink);
+    display:flex;align-items:center;gap:8px;
+  }
+  .card h3 .num{
+    width:22px;height:22px;border-radius:50%;background:var(--paper-2);
+    color:var(--navy);font-size:12px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;
+  }
+  .card h3 .hint-inline{font-size:11.5px;color:var(--ink-soft);font-weight:400;margin-left:auto;}
+  .row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .row.two{grid-template-columns:repeat(2,1fr);}
+  .row.four{grid-template-columns:repeat(4,1fr);}
+  @media (max-width:640px){ .row, .row.two, .row.four{grid-template-columns:1fr 1fr;} }
+
+  .subtotal-line{
+    margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);
+    display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--ink-soft);
+    flex-wrap:wrap;gap:6px;
+  }
+  .subtotal-line .amt{font-family:'Noto Serif TC',serif;font-weight:700;font-size:17px;color:var(--ink);}
+
+  .child-count-picker{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .child-count-picker button{
+    padding:8px 16px;border-radius:20px;border:1px solid var(--line);background:#fff;
+    font-family:inherit;font-size:13px;cursor:pointer;color:var(--ink-soft);font-weight:600;
+  }
+  .child-count-picker button.active{
+    background:var(--resp);border-color:var(--resp);color:#fff;
+  }
+
+  .child-card{border-left:3px solid var(--resp-soft);}
+  .child-sub-block{background:var(--paper);border-radius:8px;padding:12px;margin-top:10px;}
+  .child-sub-block .st{font-size:12px;font-weight:700;color:var(--resp);margin-bottom:8px;}
+  .child-sub-block .row{grid-template-columns:1fr 1fr 1fr;}
+  @media (max-width:640px){ .child-sub-block .row{grid-template-columns:1fr 1fr;} }
+  .child-total-line{
+    margin-top:10px;text-align:right;font-size:13px;color:var(--ink-soft);
+  }
+  .child-total-line .amt{font-family:'Noto Serif TC',serif;font-weight:700;font-size:16px;color:var(--resp);}
+
+  .dyn-list .dyn-row{
+    display:grid;grid-template-columns:1.3fr .9fr .6fr auto;gap:10px;align-items:end;margin-bottom:10px;
+  }
+  .dyn-row.re-row{grid-template-columns:1.4fr 1fr auto;}
+  @media (max-width:640px){ .dyn-row, .dyn-row.re-row{grid-template-columns:1fr 1fr;} .dyn-row button.rm, .dyn-row.re-row button.rm{grid-column:span 2;justify-self:end;} }
+  .dyn-row button.rm{
+    background:none;border:1px solid var(--line);border-radius:6px;color:var(--ink-soft);
+    height:38px;width:38px;cursor:pointer;font-size:16px;
+  }
+  .add-btn{
+    background:none;border:1px dashed var(--asset);color:var(--asset);
+    padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+  }
+  .block.responsibility .add-btn{border-color:var(--resp);color:var(--resp);}
+
+  .grand-card{
+    background:var(--navy);color:#F3EEE2;border-radius:12px;padding:20px 22px;margin-top:16px;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+  }
+  .grand-card .lbl{font-size:13px;color:#B9C3D2;letter-spacing:.05em;}
+  .grand-card .amt{font-family:'Noto Serif TC',serif;font-size:28px;font-weight:700;color:var(--gold-soft);}
+  .block.responsibility .grand-card{background:var(--resp);}
+  .block.responsibility .grand-card .lbl{color:#F3DFD8;}
+  .block.responsibility .grand-card .amt{color:#fff;}
+  .block.assets .grand-card{background:var(--asset);}
+  .block.assets .grand-card .lbl{color:#DCEAE4;}
+  .block.assets .grand-card .amt{color:#fff;}
+
+  /* ---- Result / scale section ---- */
+  .result-section{
+    margin-top:38px;background:var(--card);border-radius:14px;padding:30px 24px;
+    border:1px solid var(--line);box-shadow:0 12px 34px rgba(18,40,63,0.08);
+    text-align:center;
+  }
+  .result-section h2{
+    font-family:'Noto Serif TC',serif;font-size:22px;color:var(--navy);margin:0 0 4px;
+  }
+  .result-section .sub{font-size:13px;color:var(--ink-soft);margin-bottom:22px;}
+
+  .scale-svg{max-width:420px;width:100%;height:auto;margin:0 auto;display:block;}
+  .scale-pan-label{font-family:'Noto Sans TC';font-size:13px;font-weight:700;}
+
+  .gap-readout{margin-top:22px;}
+  .gap-readout .gap-label{font-size:13px;color:var(--ink-soft);letter-spacing:.05em;}
+  .gap-readout .gap-amt{
+    font-family:'Noto Serif TC',serif;font-weight:700;font-size:clamp(30px,7vw,44px);
+    margin:6px 0 2px;
+  }
+  .gap-amt.short{color:var(--resp);}
+  .gap-amt.covered{color:var(--asset);}
+  .gap-readout .gap-desc{font-size:13px;color:var(--ink-soft);max-width:480px;margin:0 auto;}
+
+  .side-by-side{
+    display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px;
+  }
+  @media (max-width:640px){ .side-by-side{grid-template-columns:1fr;} }
+  .sbs-card{border-radius:10px;padding:16px;text-align:left;}
+  .sbs-card.r{background:var(--resp-soft);}
+  .sbs-card.a{background:var(--asset-soft);}
+  .sbs-card .t{font-size:12px;font-weight:700;letter-spacing:.04em;margin-bottom:6px;}
+  .sbs-card.r .t{color:var(--resp);}
+  .sbs-card.a .t{color:var(--asset);}
+  .sbs-card .v{font-family:'Noto Serif TC',serif;font-size:21px;font-weight:700;color:var(--ink);}
+
+  /* sticky footer */
+  .sticky-bar{
+    position:fixed;bottom:0;left:0;right:0;background:var(--navy);color:#fff;
+    padding:12px 16px;display:flex;justify-content:center;gap:26px;flex-wrap:wrap;
+    box-shadow:0 -6px 20px rgba(0,0,0,0.18);z-index:50;font-size:12px;
+  }
+  .sticky-bar .item{text-align:center;min-width:90px;}
+  .sticky-bar .item .l{color:#9FAEC2;font-size:11px;}
+  .sticky-bar .item .v{font-family:'Noto Serif TC',serif;font-weight:700;font-size:16px;}
+  .sticky-bar .item.r .v{color:#E9B7A9;}
+  .sticky-bar .item.a .v{color:#A9D4C6;}
+  .sticky-bar .item.g .v{color:var(--gold-soft);}
+
+  .print-btn-wrap{text-align:center;margin-top:22px;}
+  .print-btn{
+    background:var(--gold);color:#fff;border:none;padding:12px 28px;border-radius:24px;
+    font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.04em;
+  }
+
+  .hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;line-height:1.5;}
+
+  /* Print styles */
+  #printReport{display:none;}
+  @media print{
+    body *{visibility:hidden;}
+    .sticky-bar, .child-count-picker, .add-btn, .dyn-row button.rm, .print-btn-wrap, .client-manager{display:none !important;}
+    #printReport, #printReport *{visibility:visible;}
+    #printReport{display:block;position:absolute;top:0;left:0;width:100%;padding:20px;}
+  }
+  .pr-title{font-family:'Noto Serif TC',serif;font-size:22px;color:var(--navy);border-bottom:3px solid var(--gold);padding-bottom:10px;margin-bottom:16px;}
+  .pr-meta{font-size:13px;color:var(--ink-soft);margin-bottom:18px;}
+  .pr-section{margin-bottom:16px;}
+  .pr-section h4{font-family:'Noto Serif TC',serif;font-size:15px;margin:0 0 8px;color:var(--navy);border-left:4px solid var(--gold);padding-left:8px;}
+  .pr-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px dotted var(--line);}
+  .pr-total{display:flex;justify-content:space-between;font-weight:700;font-size:15px;margin-top:8px;padding-top:8px;border-top:2px solid var(--ink);}
+  .pr-gap{margin-top:22px;padding:16px;background:var(--paper-2);border-radius:8px;text-align:center;}
+  .pr-gap .g{font-family:'Noto Serif TC',serif;font-size:28px;font-weight:700;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">保單健診・缺口填補</div>
+  <h1>家庭責任缺口分析</h1>
+  <p class="sub">用一份計算，看清「留下多少」與「已經準備多少」之間的距離</p>
+  <div class="rule"></div>
+</header>
+
+<div class="meta-card">
+  <div class="meta-inner">
+    <div class="meta-grid">
+      <div class="field"><label>要保人 / 被保險人姓名</label><input id="clientName" placeholder="例：王先生"></div>
+      <div class="field"><label>顧問姓名</label><input id="advisorName" placeholder="例：吳金津"></div>
+      <div class="field"><label>試算日期</label><input id="reportDate" type="date"></div>
+    </div>
+    <div class="client-manager">
+      <div class="field">
+        <label>已儲存的客戶資料</label>
+        <select id="clientSelect"><option value="">－ 選擇客戶 －</option></select>
+      </div>
+      <button class="mgr-btn" id="loadBtn" type="button">讀取</button>
+      <button class="mgr-btn del" id="deleteBtn" type="button">刪除</button>
+      <button class="mgr-btn save" id="saveBtn" type="button">儲存此客戶資料</button>
+    </div>
+    <div class="save-msg" id="saveMsg"></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ===================== 家庭責任 ===================== -->
+  <section class="block responsibility">
+    <div class="block-head">
+      <span class="tag">PART 1</span>
+      <h2>家庭責任</h2>
+      <span class="note">如果我今天被上帝接走，需要留下多少？</span>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">1</span>配偶生活費</h3>
+      <div class="row">
+        <div class="field"><label>配偶姓名</label><input type="text" id="spouseName" placeholder="配偶姓名"></div>
+        <div class="field"><label>配偶現在年齡</label><input type="number" id="spouseAge" value="40" min="0" max="100"></div>
+        <div class="field"><label>預估平均壽命</label><input type="number" id="spouseLE" value="85" min="1" max="120"></div>
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <div class="field"><label>每月希望留給配偶（元）</label><input type="number" id="spouseMonthly" value="30000" step="1000" min="0"></div>
+      </div>
+      <div class="subtotal-line">
+        <span id="spouseYearsTxt">保障年期：45 年（540 個月）</span>
+        <span class="amt" id="spouseTotal">NT$ 0</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">2</span>父母孝親費</h3>
+      <div class="row two">
+        <div class="field"><label>照顧年期（年）</label><input type="number" id="parentsYears" value="0" min="0" max="60"></div>
+        <div class="field"><label>每月孝親金額（元）</label><input type="number" id="parentsMonthly" value="0" step="1000" min="0"></div>
+      </div>
+      <div class="subtotal-line">
+        <span>父母孝親費合計</span>
+        <span class="amt" id="parentsTotal">NT$ 0</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">3</span>子女生活費 &amp; 教育費</h3>
+      <div class="hint" style="margin-bottom:12px;">選擇子女人數，填上姓名、現在年齡，以及希望照顧到幾歲，系統會自動算出年期與總金額。</div>
+      <div class="child-count-picker" id="childCountPicker"></div>
+      <div id="childrenList"></div>
+      <div class="subtotal-line">
+        <span>子女生活費＋教育費合計</span>
+        <span class="amt" id="childTotal">NT$ 0</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">4</span>負債清償</h3>
+      <div class="dyn-list" id="loanList"></div>
+      <button class="add-btn" id="addLoan" type="button">＋ 新增貸款項目</button>
+      <div class="subtotal-line">
+        <span>負債合計</span>
+        <span class="amt" id="loanTotal">NT$ 0</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">5</span>配偶及子女未到期保費</h3>
+      <div class="row two">
+        <div class="field"><label>未到期保費（元）</label><input type="number" id="unexpiredPremium" value="0" step="1000" min="0"></div>
+        <div class="field"><label class="hint" style="margin-top:24px;">＊保單健診後填入</label></div>
+      </div>
+      <div class="subtotal-line">
+        <span>未到期保費</span>
+        <span class="amt" id="unexpiredTotal">NT$ 0</span>
+      </div>
+    </div>
+
+    <div class="grand-card">
+      <span class="lbl">家庭責任總額</span>
+      <span class="amt" id="respGrand">NT$ 0</span>
+    </div>
+  </section>
+
+  <!-- ===================== 資產 ===================== -->
+  <section class="block assets">
+    <div class="block-head">
+      <span class="tag">PART 2</span>
+      <h2>現有資產</h2>
+      <span class="note">已經準備了多少？</span>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">1</span>動產<span class="hint-inline">美元金額將依匯率換算為台幣</span></h3>
+      <div class="row two" style="margin-bottom:12px;">
+        <div class="field"><label>定存－台幣（元）</label><input type="number" id="depositTwd" value="0" step="10000" min="0"></div>
+        <div class="field"><label>定存－美元（USD）</label><input type="number" id="depositUsd" value="0" step="1000" min="0"></div>
+      </div>
+      <div class="row two" style="margin-bottom:12px;">
+        <div class="field"><label>儲蓄險－台幣（元）</label><input type="number" id="savingsTwd" value="0" step="10000" min="0"></div>
+        <div class="field"><label>儲蓄險－美元（USD）</label><input type="number" id="savingsUsd" value="0" step="1000" min="0"></div>
+      </div>
+      <div class="row two" style="margin-bottom:12px;">
+        <div class="field"><label>債券－投資級（元）</label><input type="number" id="bondInv" value="0" step="10000" min="0"></div>
+        <div class="field"><label>債券－高收益（元）</label><input type="number" id="bondHigh" value="0" step="10000" min="0"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>股票（元）</label><input type="number" id="assetStock" value="0" step="10000" min="0"></div>
+        <div class="field"><label>基金（元）</label><input type="number" id="assetFund" value="0" step="10000" min="0"></div>
+        <div class="field"><label>美元兌台幣匯率</label><input type="number" id="usdRate" value="32" step="0.1" min="1"></div>
+      </div>
+      <div class="subtotal-line">
+        <span>動產合計（已換算台幣）</span>
+        <span class="amt" id="movableTotal">NT$ 0</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">2</span>不動產</h3>
+      <div class="dyn-list" id="reList"></div>
+      <button class="add-btn" id="addRe" type="button">＋ 新增不動產</button>
+      <div class="subtotal-line">
+        <span>不動產合計（市值）</span>
+        <span class="amt" id="reTotal">NT$ 0</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">3</span>其他財產</h3>
+      <div class="row two">
+        <div class="field"><label>項目說明</label><input type="text" id="otherAssetName" placeholder="例：珠寶、車輛、其他投資"></div>
+        <div class="field"><label>估計價值（元）</label><input type="number" id="otherAssetValue" value="0" step="10000" min="0"></div>
+      </div>
+      <div class="subtotal-line">
+        <span>其他財產合計</span>
+        <span class="amt" id="otherAssetTotal">NT$ 0</span>
+      </div>
+    </div>
+
+    <div class="grand-card">
+      <span class="lbl">資產總額</span>
+      <span class="amt" id="assetGrand">NT$ 0</span>
+    </div>
+  </section>
+
+  <!-- ===================== 結果 ===================== -->
+  <section class="result-section">
+    <h2>缺口分析結果</h2>
+    <div class="sub">家庭責任與現有資產的天平，傾斜的一端就是需要規劃的方向</div>
+
+    <svg class="scale-svg" viewBox="0 0 420 260" id="scaleSvg">
+      <line x1="210" y1="20" x2="210" y2="230" stroke="#12283F" stroke-width="4"/>
+      <circle cx="210" cy="18" r="6" fill="#B8925A"/>
+      <rect x="170" y="225" width="80" height="10" rx="2" fill="#12283F"/>
+      <g id="beamGroup" style="transform-origin:210px 40px;transition:transform .5s ease;">
+        <line x1="60" y1="40" x2="360" y2="40" stroke="#12283F" stroke-width="5"/>
+        <line id="lchain1" x1="90" y1="40" x2="90" y2="90" stroke="#5B6470" stroke-width="2"/>
+        <line id="lchain2" x1="130" y1="40" x2="130" y2="90" stroke="#5B6470" stroke-width="2"/>
+        <ellipse id="panL" cx="110" cy="95" rx="52" ry="14" fill="#8B4A3F"/>
+        <text class="scale-pan-label" x="110" y="99" text-anchor="middle" fill="#fff">責任</text>
+
+        <line id="rchain1" x1="290" y1="40" x2="290" y2="90" stroke="#5B6470" stroke-width="2"/>
+        <line id="rchain2" x1="330" y1="40" x2="330" y2="90" stroke="#5B6470" stroke-width="2"/>
+        <ellipse id="panR" cx="310" cy="95" rx="52" ry="14" fill="#3F6E64"/>
+        <text class="scale-pan-label" x="310" y="99" text-anchor="middle" fill="#fff">資產</text>
+      </g>
+    </svg>
+
+    <div class="gap-readout">
+      <div class="gap-label" id="gapLabel">建議規劃保額</div>
+      <div class="gap-amt short" id="gapAmt">NT$ 0</div>
+      <div class="gap-desc" id="gapDesc">家庭責任與資產差額，即為需要透過壽險補足的保障缺口。</div>
+    </div>
+
+    <div class="side-by-side">
+      <div class="sbs-card r">
+        <div class="t">家庭責任總額</div>
+        <div class="v" id="sbsResp">NT$ 0</div>
+      </div>
+      <div class="sbs-card a">
+        <div class="t">現有資產總額</div>
+        <div class="v" id="sbsAsset">NT$ 0</div>
+      </div>
+    </div>
+
+    <div class="print-btn-wrap">
+      <button class="print-btn" id="printBtn" type="button">列印 / 產生健診報告</button>
+    </div>
+  </section>
+
+</div>
+
+<div class="sticky-bar">
+  <div class="item r"><div class="l">家庭責任</div><div class="v" id="stickyResp">0</div></div>
+  <div class="item a"><div class="l">現有資產</div><div class="v" id="stickyAsset">0</div></div>
+  <div class="item g"><div class="l">保障缺口</div><div class="v" id="stickyGap">0</div></div>
+</div>
+
+<!-- Printable report, populated by JS before print -->
+<div id="printReport"></div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+  const fmt = n => 'NT$ ' + Math.round(n).toLocaleString('zh-TW');
+  const fmtWan = n => (n/10000).toLocaleString('zh-TW', {maximumFractionDigits:1}) + ' 萬';
+  const STORE_KEY = 'familyGapClients_v1';
+
+  // ================= children =================
+  let childCount = 2;
+  const childDefaults = [
+    {name:'長子', age:5},
+    {name:'次子', age:3},
+    {name:'三子', age:1},
+    {name:'四子', age:0},
+    {name:'五子', age:0},
+  ];
+
+  function renderChildPicker(){
+    const wrap = $('childCountPicker');
+    wrap.innerHTML = '';
+    for(let i=0;i<=5;i++){
+      const b = document.createElement('button');
+      b.textContent = i===0 ? '無子女' : i+' 位子女';
+      b.type = 'button';
+      if(i===childCount) b.classList.add('active');
+      b.addEventListener('click', ()=>{ childCount = i; renderChildPicker(); renderChildren(); calc(); });
+      wrap.appendChild(b);
+    }
+  }
+
+  function childCardTemplate(i, d){
+    const def = childDefaults[i] || {name:'', age:0};
+    return `
+      <h3><span class="num">${i+1}</span>子女 ${i+1}</h3>
+      <div class="row">
+        <div class="field"><label>姓名</label><input type="text" class="c-name" value="${d.name!==undefined?d.name:def.name}" placeholder="子女姓名"></div>
+        <div class="field"><label>現在年齡</label><input type="number" class="c-age" min="0" max="30" value="${d.age!==undefined?d.age:def.age}"></div>
+        <div class="field"></div>
+      </div>
+      <div class="child-sub-block">
+        <div class="st">生活費</div>
+        <div class="row">
+          <div class="field"><label>照顧到幾歲</label><input type="number" class="c-l-endage" min="0" max="35" value="${d.lEndAge!==undefined?d.lEndAge:24}"></div>
+          <div class="field"><label>每月生活費（元）</label><input type="number" class="c-l-monthly" min="0" step="500" value="${d.lMonthly!==undefined?d.lMonthly:15000}"></div>
+          <div class="field"><label>&nbsp;</label><div class="hint c-l-years">年期：－</div></div>
+        </div>
+      </div>
+      <div class="child-sub-block">
+        <div class="st">教育費</div>
+        <div class="row">
+          <div class="field"><label>照顧到幾歲</label><input type="number" class="c-e-endage" min="0" max="30" value="${d.eEndAge!==undefined?d.eEndAge:22}"></div>
+          <div class="field"><label>每月教育費（元）</label><input type="number" class="c-e-monthly" min="0" step="500" value="${d.eMonthly!==undefined?d.eMonthly:0}"></div>
+          <div class="field"><label>&nbsp;</label><div class="hint c-e-years">年期：－</div></div>
+        </div>
+      </div>
+      <div class="child-total-line">此子女合計：<span class="amt c-subtotal">NT$ 0</span></div>
+    `;
+  }
+
+  function renderChildren(){
+    const list = $('childrenList');
+    const existing = {};
+    list.querySelectorAll('.child-card').forEach(card=>{
+      const idx = card.dataset.idx;
+      existing[idx] = {
+        name: card.querySelector('.c-name').value,
+        age: card.querySelector('.c-age').value,
+        lEndAge: card.querySelector('.c-l-endage').value,
+        lMonthly: card.querySelector('.c-l-monthly').value,
+        eEndAge: card.querySelector('.c-e-endage').value,
+        eMonthly: card.querySelector('.c-e-monthly').value,
+      };
+    });
+    list.innerHTML = '';
+    for(let i=0;i<childCount;i++){
+      const d = existing[i] || {};
+      const card = document.createElement('div');
+      card.className = 'card child-card';
+      card.dataset.idx = i;
+      card.innerHTML = childCardTemplate(i, d);
+      list.appendChild(card);
+      card.querySelectorAll('input').forEach(inp=> inp.addEventListener('input', calc));
+    }
+  }
+
+  // ================= dynamic loan list =================
+  let loanRows = [
+    {name:'不動產貸款', amount:0, rate:0},
+    {name:'車貸', amount:0, rate:0},
+    {name:'信用貸款', amount:0, rate:0},
+  ];
+  function syncLoanRowsFromDom(){
+    const rows = [];
+    $('loanList').querySelectorAll('.dyn-row').forEach(row=>{
+      rows.push({
+        name: row.querySelector('.l-name').value,
+        amount: row.querySelector('.l-amount').value,
+        rate: row.querySelector('.l-rate').value,
+      });
+    });
+    if(rows.length) loanRows = rows;
+  }
+  function renderLoans(){
+    const list = $('loanList');
+    list.innerHTML = '';
+    loanRows.forEach((r,i)=>{
+      const row = document.createElement('div');
+      row.className = 'dyn-row';
+      row.innerHTML = `
+        <div class="field"><label>貸款項目</label><input type="text" class="l-name" value="${r.name}" placeholder="例：不動產貸款"></div>
+        <div class="field"><label>金額（元）</label><input type="number" class="l-amount" value="${r.amount}" step="10000" min="0"></div>
+        <div class="field"><label>利率（%）</label><input type="number" class="l-rate" value="${r.rate}" step="0.1" min="0"></div>
+        <button type="button" class="rm" title="移除">×</button>
+      `;
+      list.appendChild(row);
+      row.querySelectorAll('input').forEach(inp=> inp.addEventListener('input', calc));
+      row.querySelector('.rm').addEventListener('click', ()=>{
+        syncLoanRowsFromDom();
+        loanRows.splice(i,1);
+        if(loanRows.length===0) loanRows=[{name:'',amount:0,rate:0}];
+        renderLoans(); calc();
+      });
+    });
+  }
+  $('addLoan').addEventListener('click', ()=>{
+    syncLoanRowsFromDom();
+    loanRows.push({name:'', amount:0, rate:0});
+    renderLoans(); calc();
+  });
+
+  // ================= real estate =================
+  let reRows = [{name:'自住房', value:0}];
+  function syncReRowsFromDom(){
+    const rows = [];
+    $('reList').querySelectorAll('.dyn-row').forEach(row=>{
+      rows.push({ name: row.querySelector('.re-name').value, value: row.querySelector('.re-value').value });
+    });
+    if(rows.length) reRows = rows;
+  }
+  function renderRE(){
+    const list = $('reList');
+    list.innerHTML = '';
+    reRows.forEach((r, i)=>{
+      const row = document.createElement('div');
+      row.className = 'dyn-row re-row';
+      row.innerHTML = `
+        <div class="field"><label>不動產名稱</label><input type="text" class="re-name" value="${r.name}" placeholder="例：自住房、投資型套房"></div>
+        <div class="field"><label>估計市值（元）</label><input type="number" class="re-value" value="${r.value}" step="10000" min="0"></div>
+        <button type="button" class="rm" title="移除">×</button>
+      `;
+      list.appendChild(row);
+      row.querySelectorAll('input').forEach(inp=> inp.addEventListener('input', calc));
+      row.querySelector('.rm').addEventListener('click', ()=>{
+        syncReRowsFromDom();
+        reRows.splice(i,1);
+        if(reRows.length===0) reRows = [{name:'', value:0}];
+        renderRE(); calc();
+      });
+    });
+  }
+  $('addRe').addEventListener('click', ()=>{
+    syncReRowsFromDom();
+    reRows.push({name:'', value:0});
+    renderRE(); calc();
+  });
+
+  // ================= main calc =================
+  function calc(){
+    // spouse
+    const spouseAge = num($('spouseAge').value);
+    const spouseLE = num($('spouseLE').value);
+    const spouseMonthly = num($('spouseMonthly').value);
+    const spouseYears = Math.max(0, spouseLE - spouseAge);
+    const spouseTotal = spouseYears * 12 * spouseMonthly;
+    $('spouseYearsTxt').textContent = `保障年期：${spouseYears} 年（${spouseYears*12} 個月）`;
+    $('spouseTotal').textContent = fmt(spouseTotal);
+
+    // parents
+    const parentsYears = num($('parentsYears').value);
+    const parentsMonthly = num($('parentsMonthly').value);
+    const parentsTotal = parentsYears * 12 * parentsMonthly;
+    $('parentsTotal').textContent = fmt(parentsTotal);
+
+    // children
+    let childTotal = 0;
+    document.querySelectorAll('.child-card').forEach(card=>{
+      const age = num(card.querySelector('.c-age').value);
+      const lEndAge = num(card.querySelector('.c-l-endage').value);
+      const lMonthly = num(card.querySelector('.c-l-monthly').value);
+      const eEndAge = num(card.querySelector('.c-e-endage').value);
+      const eMonthly = num(card.querySelector('.c-e-monthly').value);
+
+      const lYears = Math.max(0, lEndAge - age);
+      const eYears = Math.max(0, eEndAge - age);
+      const lSub = lYears * 12 * lMonthly;
+      const eSub = eYears * 12 * eMonthly;
+      const sub = lSub + eSub;
+
+      card.querySelector('.c-l-years').textContent = `年期：${lYears} 年`;
+      card.querySelector('.c-e-years').textContent = `年期：${eYears} 年`;
+      card.querySelector('.c-subtotal').textContent = fmt(sub);
+
+      childTotal += sub;
+    });
+    $('childTotal').textContent = fmt(childTotal);
+
+    // loans
+    let loanTotal = 0;
+    document.querySelectorAll('#loanList .dyn-row').forEach(row=>{
+      loanTotal += num(row.querySelector('.l-amount').value);
+    });
+    $('loanTotal').textContent = fmt(loanTotal);
+
+    // unexpired premium
+    const unexpired = num($('unexpiredPremium').value);
+    $('unexpiredTotal').textContent = fmt(unexpired);
+
+    const respGrand = spouseTotal + parentsTotal + childTotal + loanTotal + unexpired;
+    $('respGrand').textContent = fmt(respGrand);
+
+    // assets - movable
+    const usdRate = num($('usdRate').value) || 0;
+    const depositTwd = num($('depositTwd').value);
+    const depositUsd = num($('depositUsd').value) * usdRate;
+    const savingsTwd = num($('savingsTwd').value);
+    const savingsUsd = num($('savingsUsd').value) * usdRate;
+    const bondInv = num($('bondInv').value);
+    const bondHigh = num($('bondHigh').value);
+    const aStock = num($('assetStock').value);
+    const aFund = num($('assetFund').value);
+    const movableTotal = depositTwd + depositUsd + savingsTwd + savingsUsd + bondInv + bondHigh + aStock + aFund;
+    $('movableTotal').textContent = fmt(movableTotal);
+
+    // real estate
+    let reTotal = 0;
+    document.querySelectorAll('#reList .dyn-row').forEach(row=>{
+      reTotal += num(row.querySelector('.re-value').value);
+    });
+    $('reTotal').textContent = fmt(reTotal);
+
+    // other assets
+    const otherAssetValue = num($('otherAssetValue').value);
+    $('otherAssetTotal').textContent = fmt(otherAssetValue);
+
+    const assetGrand = movableTotal + reTotal + otherAssetValue;
+    $('assetGrand').textContent = fmt(assetGrand);
+
+    // gap
+    const gap = respGrand - assetGrand;
+    const gapAmtEl = $('gapAmt');
+    if(gap > 0){
+      $('gapLabel').textContent = '建議規劃保額（保障缺口）';
+      gapAmtEl.textContent = fmt(gap);
+      gapAmtEl.className = 'gap-amt short';
+      $('gapDesc').textContent = '家庭責任大於現有資產，這是可以透過壽險規劃補足的缺口。';
+    } else {
+      $('gapLabel').textContent = '資產已覆蓋家庭責任（結餘）';
+      gapAmtEl.textContent = fmt(-gap);
+      gapAmtEl.className = 'gap-amt covered';
+      $('gapDesc').textContent = '現有資產已足以覆蓋家庭責任，可進一步討論資產配置與稅務規劃。';
+    }
+
+    $('sbsResp').textContent = fmt(respGrand);
+    $('sbsAsset').textContent = fmt(assetGrand);
+
+    $('stickyResp').textContent = fmtWan(respGrand);
+    $('stickyAsset').textContent = fmtWan(assetGrand);
+    $('stickyGap').textContent = (gap>0? fmtWan(gap) : '已足額');
+
+    const total = respGrand + assetGrand;
+    let angle = 0;
+    if(total > 0){
+      const ratio = (respGrand - assetGrand) / total;
+      angle = Math.max(-18, Math.min(18, ratio * 18));
+    }
+    $('beamGroup').style.transform = `rotate(${angle}deg)`;
+  }
+
+  ['spouseAge','spouseLE','spouseMonthly','parentsYears','parentsMonthly','unexpiredPremium',
+   'depositTwd','depositUsd','savingsTwd','savingsUsd','bondInv','bondHigh','assetStock','assetFund','usdRate','otherAssetValue']
+   .forEach(id => $(id).addEventListener('input', calc));
+  $('spouseName').addEventListener('input', ()=>{});
+  $('otherAssetName').addEventListener('input', calc);
+
+  renderChildPicker();
+  renderChildren();
+  renderLoans();
+  renderRE();
+  calc();
+
+  $('reportDate').value = new Date().toISOString().slice(0,10);
+
+  // ================= state serialize / restore =================
+  function gatherState(){
+    syncLoanRowsFromDom();
+    syncReRowsFromDom();
+    const children = [];
+    document.querySelectorAll('.child-card').forEach(card=>{
+      children.push({
+        name: card.querySelector('.c-name').value,
+        age: card.querySelector('.c-age').value,
+        lEndAge: card.querySelector('.c-l-endage').value,
+        lMonthly: card.querySelector('.c-l-monthly').value,
+        eEndAge: card.querySelector('.c-e-endage').value,
+        eMonthly: card.querySelector('.c-e-monthly').value,
+      });
+    });
+    return {
+      meta:{ advisorName:$('advisorName').value, reportDate:$('reportDate').value },
+      spouse:{ name:$('spouseName').value, age:$('spouseAge').value, le:$('spouseLE').value, monthly:$('spouseMonthly').value },
+      parents:{ years:$('parentsYears').value, monthly:$('parentsMonthly').value },
+      childCount: childCount,
+      children: children,
+      loans: loanRows,
+      unexpiredPremium: $('unexpiredPremium').value,
+      assets:{
+        depositTwd:$('depositTwd').value, depositUsd:$('depositUsd').value,
+        savingsTwd:$('savingsTwd').value, savingsUsd:$('savingsUsd').value,
+        bondInv:$('bondInv').value, bondHigh:$('bondHigh').value,
+        stock:$('assetStock').value, fund:$('assetFund').value, usdRate:$('usdRate').value,
+      },
+      realEstate: reRows,
+      otherAsset:{ name:$('otherAssetName').value, value:$('otherAssetValue').value },
+    };
+  }
+
+  function applyState(s){
+    if(!s) return;
+    if(s.meta){ $('advisorName').value = s.meta.advisorName||''; $('reportDate').value = s.meta.reportDate||''; }
+    if(s.spouse){
+      $('spouseName').value = s.spouse.name||'';
+      $('spouseAge').value = s.spouse.age!==undefined?s.spouse.age:40;
+      $('spouseLE').value = s.spouse.le!==undefined?s.spouse.le:85;
+      $('spouseMonthly').value = s.spouse.monthly!==undefined?s.spouse.monthly:30000;
+    }
+    if(s.parents){
+      $('parentsYears').value = s.parents.years||0;
+      $('parentsMonthly').value = s.parents.monthly||0;
+    }
+    childCount = s.childCount!==undefined ? s.childCount : (s.children? s.children.length : 2);
+    renderChildPicker();
+    // pre-seed children list rendering with saved data
+    const list = $('childrenList');
+    list.innerHTML = '';
+    for(let i=0;i<childCount;i++){
+      const d = (s.children && s.children[i]) ? s.children[i] : {};
+      const card = document.createElement('div');
+      card.className = 'card child-card';
+      card.dataset.idx = i;
+      card.innerHTML = childCardTemplate(i, d);
+      list.appendChild(card);
+      card.querySelectorAll('input').forEach(inp=> inp.addEventListener('input', calc));
+    }
+    if(s.loans && s.loans.length){ loanRows = s.loans; renderLoans(); }
+    if(s.unexpiredPremium!==undefined) $('unexpiredPremium').value = s.unexpiredPremium;
+    if(s.assets){
+      $('depositTwd').value = s.assets.depositTwd||0;
+      $('depositUsd').value = s.assets.depositUsd||0;
+      $('savingsTwd').value = s.assets.savingsTwd||0;
+      $('savingsUsd').value = s.assets.savingsUsd||0;
+      $('bondInv').value = s.assets.bondInv||0;
+      $('bondHigh').value = s.assets.bondHigh||0;
+      $('assetStock').value = s.assets.stock||0;
+      $('assetFund').value = s.assets.fund||0;
+      $('usdRate').value = s.assets.usdRate!==undefined?s.assets.usdRate:32;
+    }
+    if(s.realEstate && s.realEstate.length){ reRows = s.realEstate; renderRE(); }
+    if(s.otherAsset){
+      $('otherAssetName').value = s.otherAsset.name||'';
+      $('otherAssetValue').value = s.otherAsset.value||0;
+    }
+    calc();
+  }
+
+  function loadStore(){
+    try{ return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }
+    catch(e){ return {}; }
+  }
+  function saveStore(store){
+    localStorage.setItem(STORE_KEY, JSON.stringify(store));
+  }
+  function refreshClientSelect(){
+    const store = loadStore();
+    const sel = $('clientSelect');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">－ 選擇客戶 －</option>';
+    Object.keys(store).sort().forEach(name=>{
+      const opt = document.createElement('option');
+      opt.value = name; opt.textContent = name;
+      sel.appendChild(opt);
+    });
+    if(store[current]) sel.value = current;
+  }
+  function flashMsg(msg){
+    $('saveMsg').textContent = msg;
+    setTimeout(()=>{ if($('saveMsg').textContent===msg) $('saveMsg').textContent=''; }, 3000);
+  }
+
+  $('saveBtn').addEventListener('click', ()=>{
+    const name = $('clientName').value.trim();
+    if(!name){ flashMsg('請先填寫「要保人 / 被保險人姓名」再儲存'); return; }
+    const store = loadStore();
+    store[name] = gatherState();
+    saveStore(store);
+    refreshClientSelect();
+    $('clientSelect').value = name;
+    flashMsg(`已儲存「${name}」的資料`);
+  });
+
+  $('loadBtn').addEventListener('click', ()=>{
+    const name = $('clientSelect').value;
+    if(!name){ flashMsg('請先選擇要讀取的客戶'); return; }
+    const store = loadStore();
+    if(!store[name]){ flashMsg('找不到這筆資料'); return; }
+    $('clientName').value = name;
+    applyState(store[name]);
+    flashMsg(`已讀取「${name}」的資料`);
+  });
+
+  $('deleteBtn').addEventListener('click', ()=>{
+    const name = $('clientSelect').value;
+    if(!name){ flashMsg('請先選擇要刪除的客戶'); return; }
+    const store = loadStore();
+    delete store[name];
+    saveStore(store);
+    refreshClientSelect();
+    flashMsg(`已刪除「${name}」的資料`);
+  });
+
+  refreshClientSelect();
+
+  // ================= print report =================
+  function buildPrintReport(){
+    const clientName = $('clientName').value || '（未填寫）';
+    const advisorName = $('advisorName').value || '（未填寫）';
+    const date = $('reportDate').value || '';
+    const spouseName = $('spouseName').value || '配偶';
+
+    const spouseAge = num($('spouseAge').value);
+    const spouseLE = num($('spouseLE').value);
+    const spouseMonthly = num($('spouseMonthly').value);
+    const spouseYears = Math.max(0, spouseLE - spouseAge);
+    const spouseTotal = spouseYears*12*spouseMonthly;
+
+    const parentsYears = num($('parentsYears').value);
+    const parentsMonthly = num($('parentsMonthly').value);
+    const parentsTotal = parentsYears*12*parentsMonthly;
+
+    let childRows = '';
+    let childTotal = 0;
+    document.querySelectorAll('.child-card').forEach((card,i)=>{
+      const name = card.querySelector('.c-name').value || `子女${i+1}`;
+      const age = num(card.querySelector('.c-age').value);
+      const lEndAge = num(card.querySelector('.c-l-endage').value);
+      const lMonthly = num(card.querySelector('.c-l-monthly').value);
+      const eEndAge = num(card.querySelector('.c-e-endage').value);
+      const eMonthly = num(card.querySelector('.c-e-monthly').value);
+      const lYears = Math.max(0, lEndAge-age);
+      const eYears = Math.max(0, eEndAge-age);
+      const lSub = lYears*12*lMonthly;
+      const eSub = eYears*12*eMonthly;
+      childTotal += lSub + eSub;
+      childRows += `<div class="pr-row"><span>${name}－生活費（${age}歲 → ${lEndAge}歲，共${lYears}年）每月 ${lMonthly.toLocaleString('zh-TW')} 元</span><span>${fmt(lSub)}</span></div>`;
+      childRows += `<div class="pr-row"><span>${name}－教育費（${age}歲 → ${eEndAge}歲，共${eYears}年）每月 ${eMonthly.toLocaleString('zh-TW')} 元</span><span>${fmt(eSub)}</span></div>`;
+    });
+
+    let loanRowsHtml = '';
+    let loanTotal = 0;
+    document.querySelectorAll('#loanList .dyn-row').forEach(row=>{
+      const name = row.querySelector('.l-name').value || '貸款';
+      const amount = num(row.querySelector('.l-amount').value);
+      const rate = num(row.querySelector('.l-rate').value);
+      loanTotal += amount;
+      loanRowsHtml += `<div class="pr-row"><span>${name}（利率 ${rate}%）</span><span>${fmt(amount)}</span></div>`;
+    });
+
+    const unexpired = num($('unexpiredPremium').value);
+    const respGrand = spouseTotal + parentsTotal + childTotal + loanTotal + unexpired;
+
+    const usdRate = num($('usdRate').value) || 0;
+    const depositTwd = num($('depositTwd').value);
+    const depositUsd = num($('depositUsd').value);
+    const savingsTwd = num($('savingsTwd').value);
+    const savingsUsd = num($('savingsUsd').value);
+    const bondInv = num($('bondInv').value);
+    const bondHigh = num($('bondHigh').value);
+    const aStock = num($('assetStock').value);
+    const aFund = num($('assetFund').value);
+    const movableTotal = depositTwd + depositUsd*usdRate + savingsTwd + savingsUsd*usdRate + bondInv + bondHigh + aStock + aFund;
+
+    let reRowsHtml = '';
+    let reTotal = 0;
+    document.querySelectorAll('#reList .dyn-row').forEach(row=>{
+      const name = row.querySelector('.re-name').value || '不動產';
+      const val = num(row.querySelector('.re-value').value);
+      reTotal += val;
+      if(val>0 || row.querySelector('.re-name').value) reRowsHtml += `<div class="pr-row"><span>${name}</span><span>${fmt(val)}</span></div>`;
+    });
+
+    const otherAssetName = $('otherAssetName').value || '其他財產';
+    const otherAssetValue = num($('otherAssetValue').value);
+    const assetGrand = movableTotal + reTotal + otherAssetValue;
+
+    const gap = respGrand - assetGrand;
+
+    $('printReport').innerHTML = `
+      <div class="pr-title">家庭責任缺口分析報告</div>
+      <div class="pr-meta">要保人／被保險人：${clientName}　｜　顧問：${advisorName}　｜　日期：${date}</div>
+
+      <div class="pr-section">
+        <h4>一、家庭責任</h4>
+        <div class="pr-row"><span>${spouseName}生活費（${spouseAge}歲 → ${spouseLE}歲，共${spouseYears}年，每月 ${spouseMonthly.toLocaleString('zh-TW')} 元）</span><span>${fmt(spouseTotal)}</span></div>
+        <div class="pr-row"><span>父母孝親費（${parentsYears}年，每月 ${parentsMonthly.toLocaleString('zh-TW')} 元）</span><span>${fmt(parentsTotal)}</span></div>
+        ${childRows}
+        ${loanRowsHtml}
+        <div class="pr-row"><span>配偶及子女未到期保費</span><span>${fmt(unexpired)}</span></div>
+        <div class="pr-total"><span>家庭責任總額</span><span>${fmt(respGrand)}</span></div>
+      </div>
+
+      <div class="pr-section">
+        <h4>二、現有資產</h4>
+        <div class="pr-row"><span>定存（台幣＋美元換算）</span><span>${fmt(depositTwd+depositUsd*usdRate)}</span></div>
+        <div class="pr-row"><span>儲蓄險（台幣＋美元換算）</span><span>${fmt(savingsTwd+savingsUsd*usdRate)}</span></div>
+        <div class="pr-row"><span>債券（投資級＋高收益）</span><span>${fmt(bondInv+bondHigh)}</span></div>
+        <div class="pr-row"><span>股票</span><span>${fmt(aStock)}</span></div>
+        <div class="pr-row"><span>基金</span><span>${fmt(aFund)}</span></div>
+        ${reRowsHtml}
+        <div class="pr-row"><span>${otherAssetName}</span><span>${fmt(otherAssetValue)}</span></div>
+        <div class="pr-total"><span>資產總額</span><span>${fmt(assetGrand)}</span></div>
+      </div>
+
+      <div class="pr-gap">
+        ${gap>0
+          ? `<div>建議規劃保額（保障缺口）</div><div class="g" style="color:#8B4A3F;">${fmt(gap)}</div>`
+          : `<div>資產已覆蓋家庭責任（結餘）</div><div class="g" style="color:#3F6E64;">${fmt(-gap)}</div>`
+        }
+      </div>
+    `;
+  }
+
+  $('printBtn').addEventListener('click', ()=>{
+    buildPrintReport();
+    window.print();
+  });
+  window.addEventListener('beforeprint', buildPrintReport);
+
+})();
+</script>
+</body>
+</html>
