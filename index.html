@@ -21,6 +21,8 @@
     --asset-soft:#DEEAE5;
     --retire:#3B5C74;
     --retire-soft:#DCE6EC;
+    --plan:#6B4C6B;
+    --plan-soft:#EDE0EA;
     --line: rgba(18,40,63,0.14);
     --card:#FFFFFF;
   }
@@ -245,6 +247,40 @@
   .retire-total-card .v{font-family:'Noto Serif TC',serif;font-size:22px;font-weight:700;color:var(--ink);}
   .retire-total-card .sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
 
+  .block.plan .block-head .tag{background:var(--plan);}
+  .block.plan .block-head h2{color:var(--plan);}
+  .block.plan .grand-card{background:var(--plan);}
+  .block.plan .grand-card .lbl{color:#EAD9E7;}
+  .block.plan .grand-card .amt{color:#fff;}
+  .plan-pull-btn{
+    background:none;border:1px dashed var(--plan);color:var(--plan);
+    padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+    margin-top:8px;
+  }
+  .plan-basis-toggle{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .plan-basis-toggle button{
+    padding:8px 16px;border-radius:20px;border:1px solid var(--line);background:#fff;
+    font-family:inherit;font-size:13px;cursor:pointer;color:var(--ink-soft);font-weight:600;
+  }
+  .plan-basis-toggle button.active{background:var(--plan);border-color:var(--plan);color:#fff;}
+  .plan-need-split, .plan-gap-split{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px;}
+  @media (max-width:640px){ .plan-need-split, .plan-gap-split{grid-template-columns:1fr;} }
+  .plan-mini-card{border-radius:10px;padding:14px;}
+  .plan-mini-card.basic{background:var(--paper-2);}
+  .plan-mini-card.quality{background:var(--plan-soft);}
+  .plan-mini-card .t{font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;}
+  .plan-mini-card .v{font-family:'Noto Serif TC',serif;font-size:19px;font-weight:700;color:var(--ink);}
+  .plan-scenario-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px;}
+  @media (max-width:640px){ .plan-scenario-grid{grid-template-columns:1fr;} }
+  .plan-scenario-card{background:var(--plan-soft);border-radius:10px;padding:14px;text-align:center;}
+  .plan-scenario-card .rate{font-size:12px;font-weight:700;color:var(--plan);margin-bottom:6px;}
+  .plan-scenario-card .amt{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;color:var(--ink);}
+  .plan-scenario-card .lbl{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .plan-tools-note{
+    background:var(--paper-2);border-radius:8px;padding:14px;font-size:12.5px;line-height:1.9;color:var(--ink-soft);
+  }
+  .plan-tools-note b{color:var(--ink);}
+
   /* ---- Result / scale section ---- */
   .result-section{
     margin-top:38px;background:var(--card);border-radius:14px;padding:30px 24px;
@@ -311,7 +347,7 @@
   #printReport{display:none;}
   @media print{
     body *{visibility:hidden;}
-    .sticky-bar, .child-count-picker, .add-btn, .dyn-row button.rm, .print-btn-wrap, .client-manager, .sticky-save-btn, .manager-toggle, .new-client-btn{display:none !important;}
+    .sticky-bar, .child-count-picker, .add-btn, .dyn-row button.rm, .print-btn-wrap, .client-manager, .sticky-save-btn, .manager-toggle, .new-client-btn, .plan-pull-btn, .plan-basis-toggle, .retire-item-row .rm{display:none !important;}
     #printReport, #printReport *{visibility:visible;}
     #printReport{display:block;position:absolute;top:0;left:0;width:100%;padding:20px;}
   }
@@ -531,6 +567,97 @@
           <div class="v" id="retireQualityMonthly">NT$ 0</div>
           <div class="sub">年支出：<span id="retireQualityAnnual">NT$ 0</span></div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 退休金規劃 ===================== -->
+  <section class="block plan">
+    <div class="block-head">
+      <span class="tag">PART 4</span>
+      <h2>退休金規劃</h2>
+      <span class="note">怎麼樣才能存到這筆退休金？</span>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">1</span>退休金總需求</h3>
+      <div class="row two">
+        <div class="field"><label>本人現在年齡</label><input type="number" id="planOwnAge" value="45" min="0" max="100"></div>
+        <div class="field"><label>本人預估平均壽命</label><input type="number" id="planOwnLE" value="85" min="1" max="120"></div>
+      </div>
+      <div class="hint" style="margin-top:8px;">距退休年數與通膨率沿用 PART 3 的設定。</div>
+      <div class="subtotal-line">
+        <span id="planSurvivalTxt">退休後餘命：－ 年</span>
+      </div>
+      <div class="plan-need-split">
+        <div class="plan-mini-card basic">
+          <div class="t">基本退休金總需求</div>
+          <div class="v" id="planNeedBasic">NT$ 0</div>
+        </div>
+        <div class="plan-mini-card quality">
+          <div class="t">品質退休金總需求</div>
+          <div class="v" id="planNeedQuality">NT$ 0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">2</span>退休時可用資產</h3>
+      <div class="row two">
+        <div class="field"><label>退休時預估可用資產（元）</label><input type="number" id="planAvailAssets" value="0" step="10000" min="0"></div>
+        <div class="field"></div>
+      </div>
+      <button class="plan-pull-btn" id="planPullAssets" type="button">↺ 帶入 PART 2 目前資產總額</button>
+      <div class="hint" style="margin-top:10px;">提醒：如果這筆資產已經規劃用來補「家庭責任缺口」（壽險保額），就不能同一筆錢又拿來補退休金缺口，兩邊會重複計算。實際要怎麼分配，請跟客戶討論後自行調整這個欄位。</div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">3</span>退休金缺口</h3>
+      <div class="plan-gap-split">
+        <div class="plan-mini-card basic">
+          <div class="t">基本退休金缺口</div>
+          <div class="v" id="planGapBasic">NT$ 0</div>
+        </div>
+        <div class="plan-mini-card quality">
+          <div class="t">品質退休金缺口</div>
+          <div class="v" id="planGapQuality">NT$ 0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">4</span>每月儲蓄／投資試算</h3>
+      <div class="hint" style="margin-bottom:10px;">選擇要用哪個缺口試算，系統會反推：在距退休年數內，每個月要存多少錢（搭配不同預估投報率）。</div>
+      <div class="plan-basis-toggle" id="planBasisToggle">
+        <button type="button" data-basis="basic">用基本缺口</button>
+        <button type="button" data-basis="quality" class="active">用品質缺口</button>
+      </div>
+      <div class="plan-scenario-grid">
+        <div class="plan-scenario-card">
+          <div class="rate">保守型・年化 1.5%</div>
+          <div class="amt" id="planMonthlyConservative">NT$ 0</div>
+          <div class="lbl">元／月</div>
+        </div>
+        <div class="plan-scenario-card">
+          <div class="rate">穩健型・年化 3%</div>
+          <div class="amt" id="planMonthlyModerate">NT$ 0</div>
+          <div class="lbl">元／月</div>
+        </div>
+        <div class="plan-scenario-card">
+          <div class="rate">積極型・年化 6%</div>
+          <div class="amt" id="planMonthlyAggressive">NT$ 0</div>
+          <div class="lbl">元／月</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">5</span>常見退休金準備工具參考</h3>
+      <div class="plan-tools-note">
+        <div><b>儲蓄型保單</b>：保本、報酬穩定但偏低，適合保守、不想承擔波動的人。</div>
+        <div><b>投資型保單（月配息）</b>：有機會較高報酬，但配息可能來自本金，需承擔市場波動，適合能接受風險、想要定期現金流的人。</div>
+        <div><b>定期定額基金／股票</b>：長期複利效果好，但短期波動大，適合距退休還有一段時間、風險承受度較高的人。</div>
+        <div style="margin-top:6px;">＊以上僅為一般特性說明，實際報酬率、費用與適合度需依當時實際商品與客戶風險屬性另外規劃，本工具不提供具體商品試算。</div>
       </div>
     </div>
   </section>
@@ -876,12 +1003,89 @@
     $('retireQualityMonthly').textContent = fmt(qualityMonthly);
     $('retireQualityAnnual').textContent = fmt(qualityMonthly * 12);
 
+    calcPlan();
     scheduleAutoSave();
   }
 
   $('retireYears').addEventListener('input', calcRetire);
   $('retireInflation').addEventListener('input', calcRetire);
   renderRetireCategories();
+
+  // ================= retirement funding plan (PART 4) =================
+  let planBasis = 'quality';
+  function calcPlan(){
+    const ownAge = num($('planOwnAge').value);
+    const ownLE = num($('planOwnLE').value);
+    const years = num($('retireYears').value);
+    const retireAge = ownAge + years;
+    const survival = Math.max(0, ownLE - retireAge);
+    $('planSurvivalTxt').textContent = `退休後餘命：${survival} 年（退休時年齡約 ${retireAge} 歲）`;
+
+    const infl = num($('retireInflation').value) / 100;
+    const multiplier = Math.pow(1 + infl, years);
+    let basicMonthly = 0, qualityMonthly = 0;
+    categoryOrder.forEach(key=>{
+      (retireCats[key]||[]).forEach(item=>{
+        const amt = (parseFloat(item.amount)||0) * multiplier;
+        qualityMonthly += amt;
+        if(item.essential) basicMonthly += amt;
+      });
+    });
+    const needBasic = basicMonthly * 12 * survival;
+    const needQuality = qualityMonthly * 12 * survival;
+    $('planNeedBasic').textContent = fmt(needBasic);
+    $('planNeedQuality').textContent = fmt(needQuality);
+
+    const avail = num($('planAvailAssets').value);
+    const gapBasic = needBasic - avail;
+    const gapQuality = needQuality - avail;
+    $('planGapBasic').textContent = gapBasic > 0 ? fmt(gapBasic) : (fmt(-gapBasic) + '（已足夠）');
+    $('planGapQuality').textContent = gapQuality > 0 ? fmt(gapQuality) : (fmt(-gapQuality) + '（已足夠）');
+
+    const gap = Math.max(0, planBasis === 'basic' ? gapBasic : gapQuality);
+    const n = years * 12;
+    function monthlyPMT(annualRate){
+      if(gap <= 0 || n <= 0) return 0;
+      const r = annualRate / 12;
+      if(r === 0) return gap / n;
+      return gap * r / (Math.pow(1+r, n) - 1);
+    }
+    $('planMonthlyConservative').textContent = fmt(monthlyPMT(0.015));
+    $('planMonthlyModerate').textContent = fmt(monthlyPMT(0.03));
+    $('planMonthlyAggressive').textContent = fmt(monthlyPMT(0.06));
+
+    scheduleAutoSave();
+  }
+
+  $('planOwnAge').addEventListener('input', calcPlan);
+  $('planOwnLE').addEventListener('input', calcPlan);
+  $('planAvailAssets').addEventListener('input', calcPlan);
+  $('planPullAssets').addEventListener('click', ()=>{
+    const usdRate = num($('usdRate').value) || 0;
+    const depositTwd = num($('depositTwd').value);
+    const depositUsd = num($('depositUsd').value) * usdRate;
+    const savingsTwd = num($('savingsTwd').value);
+    const savingsUsd = num($('savingsUsd').value) * usdRate;
+    const bondInv = num($('bondInv').value);
+    const bondHigh = num($('bondHigh').value);
+    const aStock = num($('assetStock').value);
+    const aFund = num($('assetFund').value);
+    const movableTotal = depositTwd + depositUsd + savingsTwd + savingsUsd + bondInv + bondHigh + aStock + aFund;
+    let reTotal = 0;
+    document.querySelectorAll('#reList .dyn-row').forEach(row=>{ reTotal += num(row.querySelector('.re-value').value); });
+    const otherAssetValue = num($('otherAssetValue').value);
+    const assetGrand = movableTotal + reTotal + otherAssetValue;
+    $('planAvailAssets').value = Math.round(assetGrand);
+    calcPlan();
+  });
+  $('planBasisToggle').querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      planBasis = btn.dataset.basis;
+      $('planBasisToggle').querySelectorAll('button').forEach(b=> b.classList.remove('active'));
+      btn.classList.add('active');
+      calcPlan();
+    });
+  });
 
   // ================= main calc =================
   function calc(){
@@ -1048,6 +1252,7 @@
       realEstate: reRows,
       otherAsset:{ name:$('otherAssetName').value, value:$('otherAssetValue').value },
       retire:{ years:$('retireYears').value, inflation:$('retireInflation').value, cats: retireCats },
+      plan:{ ownAge:$('planOwnAge').value, ownLE:$('planOwnLE').value, availAssets:$('planAvailAssets').value, basis: planBasis },
     };
   }
 
@@ -1101,8 +1306,18 @@
       $('retireInflation').value = s.retire.inflation!==undefined?s.retire.inflation:2;
       if(s.retire.cats){ retireCats = s.retire.cats; renderRetireCategories(); }
     }
+    if(s.plan){
+      $('planOwnAge').value = s.plan.ownAge!==undefined?s.plan.ownAge:45;
+      $('planOwnLE').value = s.plan.ownLE!==undefined?s.plan.ownLE:85;
+      $('planAvailAssets').value = s.plan.availAssets!==undefined?s.plan.availAssets:0;
+      planBasis = s.plan.basis || 'quality';
+      $('planBasisToggle').querySelectorAll('button').forEach(b=>{
+        b.classList.toggle('active', b.dataset.basis === planBasis);
+      });
+    }
     calc();
     calcRetire();
+    calcPlan();
   }
 
   function loadStore(){
@@ -1250,6 +1465,15 @@
     retireCats = defaultRetireCats();
     renderRetireCategories();
     calcRetire();
+
+    $('planOwnAge').value = 45;
+    $('planOwnLE').value = 85;
+    $('planAvailAssets').value = 0;
+    planBasis = 'quality';
+    $('planBasisToggle').querySelectorAll('button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.basis === 'quality');
+    });
+    calcPlan();
 
     $('clientSelect').value = '';
     calc();
