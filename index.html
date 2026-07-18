@@ -744,7 +744,24 @@
     </div>
 
     <div class="card">
-      <h3><span class="num">5</span>常見退休金準備工具參考</h3>
+      <h3><span class="num">5</span>基本 vs 品質・兩種對照</h3>
+      <div class="hint" style="margin-bottom:10px;">不用切換，兩種生活水準的缺口與建議每月儲蓄（以穩健型年化 3% 試算）同時列出，方便直接跟客戶比較。</div>
+      <div class="plan-need-split">
+        <div class="plan-mini-card basic">
+          <div class="t">基本生活</div>
+          <div class="v" id="planCompareBasicGap">缺口 0 萬</div>
+          <div class="sub">建議每月存：<span id="planCompareBasicMonthly">NT$ 0</span></div>
+        </div>
+        <div class="plan-mini-card quality">
+          <div class="t">品質生活</div>
+          <div class="v" id="planCompareQualityGap">缺口 0 萬</div>
+          <div class="sub">建議每月存：<span id="planCompareQualityMonthly">NT$ 0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">6</span>常見退休金準備工具參考</h3>
       <div class="plan-tools-note">
         <div><b>儲蓄型保單</b>：保本、報酬穩定但偏低，適合保守、不想承擔波動的人。</div>
         <div><b>投資型保單（月配息）</b>：有機會較高報酬，但配息可能來自本金，需承擔市場波動，適合能接受風險、想要定期現金流的人。</div>
@@ -1243,6 +1260,19 @@
     $('planMonthlyConservative').textContent = fmt(monthlyPMT(0.015));
     $('planMonthlyModerate').textContent = fmt(monthlyPMT(0.03));
     $('planMonthlyAggressive').textContent = fmt(monthlyPMT(0.06));
+
+    const gapBasicPos = Math.max(0, gapBasic);
+    const gapQualityPos = Math.max(0, gapQuality);
+    function pmtAt(gapVal, annualRate){
+      if(gapVal <= 0 || n <= 0) return 0;
+      const r = annualRate / 12;
+      if(r === 0) return gapVal / n;
+      return gapVal * r / (Math.pow(1+r, n) - 1);
+    }
+    $('planCompareBasicGap').textContent = gapBasicPos > 0 ? `缺口 ${fmtWan(gapBasicPos)}` : '已足夠';
+    $('planCompareQualityGap').textContent = gapQualityPos > 0 ? `缺口 ${fmtWan(gapQualityPos)}` : '已足夠';
+    $('planCompareBasicMonthly').textContent = fmt(pmtAt(gapBasicPos, 0.03)) + ' ／月';
+    $('planCompareQualityMonthly').textContent = fmt(pmtAt(gapQualityPos, 0.03)) + ' ／月';
 
     scheduleAutoSave();
   }
