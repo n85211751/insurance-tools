@@ -23,6 +23,8 @@
     --retire-soft:#DCE6EC;
     --plan:#6B4C6B;
     --plan-soft:#EDE0EA;
+    --labor:#8A6D3B;
+    --labor-soft:#F0E6D2;
     --line: rgba(18,40,63,0.14);
     --card:#FFFFFF;
   }
@@ -281,6 +283,35 @@
   }
   .plan-tools-note b{color:var(--ink);}
 
+  .block.labor .block-head .tag{background:var(--labor);}
+  .block.labor .block-head h2{color:var(--labor);}
+  .block.labor .grand-card{background:var(--labor);}
+  .block.labor .grand-card .lbl{color:#F2E7D0;}
+  .block.labor .grand-card .amt{color:#fff;}
+  .labor-method-toggle{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .labor-method-toggle button{
+    padding:8px 16px;border-radius:20px;border:1px solid var(--line);background:#fff;
+    font-family:inherit;font-size:13px;cursor:pointer;color:var(--ink-soft);font-weight:600;
+  }
+  .labor-method-toggle button.active{background:var(--labor);border-color:var(--labor);color:#fff;}
+  .labor-formula-note{
+    background:var(--paper-2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--ink-soft);
+    line-height:1.8;margin-top:10px;
+  }
+  .labor-result-card{background:var(--labor-soft);border-radius:10px;padding:16px;margin-top:12px;}
+  .labor-result-card .t{font-size:12px;font-weight:700;color:var(--labor);margin-bottom:4px;}
+  .labor-result-card .v{font-family:'Noto Serif TC',serif;font-size:23px;font-weight:700;color:var(--ink);}
+  .labor-result-card .sub{font-size:11.5px;color:var(--ink-soft);margin-top:3px;}
+  .labor-haircut-readout{
+    background:var(--labor-soft);border-radius:10px;padding:14px;margin-top:12px;
+  }
+  .labor-haircut-readout .t{font-size:12px;font-weight:700;color:var(--labor);margin-bottom:4px;}
+  .labor-haircut-readout .v{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;color:var(--ink);}
+  .labor-risk-note{
+    background:var(--paper-2);border-radius:8px;padding:14px;font-size:12.5px;line-height:1.9;color:var(--ink-soft);
+  }
+  .labor-risk-note a{color:var(--labor);}
+
   /* ---- Result / scale section ---- */
   .result-section{
     margin-top:38px;background:var(--card);border-radius:14px;padding:30px 24px;
@@ -347,7 +378,7 @@
   #printReport{display:none;}
   @media print{
     body *{visibility:hidden;}
-    .sticky-bar, .child-count-picker, .add-btn, .dyn-row button.rm, .print-btn-wrap, .client-manager, .sticky-save-btn, .manager-toggle, .new-client-btn, .plan-pull-btn, .plan-basis-toggle, .retire-item-row .rm{display:none !important;}
+    .sticky-bar, .child-count-picker, .add-btn, .dyn-row button.rm, .print-btn-wrap, .client-manager, .sticky-save-btn, .manager-toggle, .new-client-btn, .plan-pull-btn, .plan-basis-toggle, .retire-item-row .rm, .labor-method-toggle{display:none !important;}
     #printReport, #printReport *{visibility:visible;}
     #printReport{display:block;position:absolute;top:0;left:0;width:100%;padding:20px;}
   }
@@ -571,10 +602,71 @@
     </div>
   </section>
 
+  <!-- ===================== 勞保老年給付估算 ===================== -->
+  <section class="block labor">
+    <div class="block-head">
+      <span class="tag">PART 4</span>
+      <h2>勞保老年給付估算</h2>
+      <span class="note">除了自己的資產，勞保退休金也是一筆</span>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">1</span>年資與投保薪資</h3>
+      <div class="row two">
+        <div class="field"><label>勞保年資（年，可小數）</label><input type="number" id="laborYears" value="20" step="0.5" min="0" max="50"></div>
+        <div class="field"><label>目前月投保薪資（元）</label><input type="number" id="laborSalary" value="45800" step="100" min="0"></div>
+      </div>
+      <div class="labor-formula-note">「平均月投保薪資」正式規定是取加保期間最高 60 個月的平均，這裡先用「目前月投保薪資」概估。正式金額建議請客戶到勞保局官網查詢或試算：<a href="https://www.bli.gov.tw/0100398.html" target="_blank" rel="noopener">bli.gov.tw 老年年金試算</a></div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">2</span>請領方式與年齡</h3>
+      <div class="labor-method-toggle" id="laborMethodToggle">
+        <button type="button" data-method="pension" class="active">月領年金</button>
+        <button type="button" data-method="lump">一次請領</button>
+      </div>
+      <div class="row two" id="laborAgeRow">
+        <div class="field"><label>預計請領年齡</label><input type="number" id="laborClaimAge" value="65" min="60" max="70"></div>
+        <div class="field"><label class="hint" style="margin-top:24px;" id="laborAgeAdjTxt">法定全額請領年齡為 65 歲</label></div>
+      </div>
+    </div>
+
+    <div class="card" id="laborResultCard">
+      <h3><span class="num">3</span>估算結果</h3>
+      <div class="labor-formula-note" id="laborFormulaCompare"></div>
+      <div class="labor-result-card">
+        <div class="t" id="laborResultLabel">預估每月可領（月領年金）</div>
+        <div class="v" id="laborResultMain">NT$ 0</div>
+        <div class="sub" id="laborResultSub">年領：NT$ 0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">4</span>破產風險與保守試算</h3>
+      <div class="labor-risk-note">
+        根據勞動部最近一次（2024 年度）勞保普通事故精算報告，在現行制度、政府持續撥補的假設下，勞保基金餘額預估會在 <b>2031 年</b>出現負值；早期精算報告曾推估最快 2026 年用罄，隨後因政府撥補與投保人數增加而延後。政府多次公開承諾負最後支付責任，但實際走向仍取決於未來的年金改革與政府撥補力度，屬於持續討論中的政策議題，本工具不對結果做出判斷，僅提供估算與保守假設的彈性。
+      </div>
+      <div class="row two" style="margin-top:12px;">
+        <div class="field"><label>保守打折比例（%）</label><input type="number" id="laborHaircut" value="100" step="5" min="0" max="100"></div>
+        <div class="field"><label class="hint" style="margin-top:24px;">可自行設一個保守值（例如 70～85%），模擬萬一未來給付調降時的情境</label></div>
+      </div>
+      <div class="labor-haircut-readout">
+        <div class="t">打折後預估金額</div>
+        <div class="v" id="laborHaircutResult">NT$ 0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">5</span>併入退休金規劃</h3>
+      <div class="hint" style="margin-bottom:10px;">會用「打折後預估金額」，依退休存活年數（月領年金）或直接（一次請領）併入 PART 5 的「退休時可用資產」。</div>
+      <button class="plan-pull-btn" id="laborPullToPlan" type="button">↺ 併入 PART 5 退休時可用資產</button>
+    </div>
+  </section>
+
   <!-- ===================== 退休金規劃 ===================== -->
   <section class="block plan">
     <div class="block-head">
-      <span class="tag">PART 4</span>
+      <span class="tag">PART 5</span>
       <h2>退休金規劃</h2>
       <span class="note">怎麼樣才能存到這筆退休金？</span>
     </div>
@@ -1011,7 +1103,105 @@
   $('retireInflation').addEventListener('input', calcRetire);
   renderRetireCategories();
 
-  // ================= retirement funding plan (PART 4) =================
+  // ================= labor insurance pension estimate (PART 4) =================
+  let laborMethod = 'pension';
+  function calcLabor(){
+    const years = num($('laborYears').value);
+    const salary = num($('laborSalary').value);
+    const claimAge = num($('laborClaimAge').value);
+    const legalAge = 65;
+    const diff = claimAge - legalAge;
+    let adjPct = 0;
+    if(diff > 0) adjPct = Math.min(diff,5)*4;
+    else if(diff < 0) adjPct = -Math.min(-diff,5)*4;
+    const adjFactor = 1 + adjPct/100;
+
+    if(diff === 0){
+      $('laborAgeAdjTxt').textContent = '法定全額請領年齡為 65 歲（無加減）';
+    } else if(diff > 0){
+      $('laborAgeAdjTxt').textContent = `延後 ${Math.min(diff,5)} 年，展延加給 ${Math.min(diff,5)*4}%`;
+    } else {
+      $('laborAgeAdjTxt').textContent = `提前 ${Math.min(-diff,5)} 年，減額給付 ${Math.min(-diff,5)*4}%`;
+    }
+
+    const formulaA = salary*years*0.00775 + 3000;
+    const formulaB = salary*years*0.0155;
+    const base = Math.max(formulaA, formulaB);
+    const monthlyPension = base * adjFactor;
+    const annualPension = monthlyPension * 12;
+
+    let months = Math.min(years,15)*1 + Math.max(0, years-15)*2;
+    months = Math.min(months, 45);
+    const lumpAmount = salary * months;
+
+    const haircut = num($('laborHaircut').value) / 100;
+
+    if(laborMethod === 'pension'){
+      $('laborResultLabel').textContent = '預估每月可領（月領年金）';
+      $('laborResultMain').textContent = fmt(monthlyPension);
+      $('laborResultSub').textContent = `年領：${fmt(annualPension)}`;
+      $('laborFormulaCompare').innerHTML = `公式A（0.775%＋3,000）：${fmt(formulaA)}／月　｜　公式B（1.55%）：${fmt(formulaB)}／月　｜　取較高者，再套用提前/展延調整`;
+      $('laborHaircutResult').textContent = fmt(monthlyPension * haircut) + ' ／月';
+    } else {
+      $('laborResultLabel').textContent = '預估一次請領金額';
+      $('laborResultMain').textContent = fmt(lumpAmount);
+      $('laborResultSub').textContent = `給付月數：${months.toFixed(1)} 個月`;
+      $('laborFormulaCompare').innerHTML = `給付月數：年資每滿1年發1個月，超過15年部分每滿1年發2個月，最高45個月 → ${months.toFixed(1)} 個月`;
+      $('laborHaircutResult').textContent = fmt(lumpAmount * haircut);
+    }
+
+    scheduleAutoSave();
+  }
+
+  $('laborMethodToggle').querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      laborMethod = btn.dataset.method;
+      $('laborMethodToggle').querySelectorAll('button').forEach(b=> b.classList.remove('active'));
+      btn.classList.add('active');
+      calcLabor();
+    });
+  });
+  ['laborYears','laborSalary','laborClaimAge','laborHaircut'].forEach(id=> $(id).addEventListener('input', calcLabor));
+  calcLabor();
+
+  $('laborPullToPlan').addEventListener('click', ()=>{
+    const years = num($('laborYears').value);
+    const salary = num($('laborSalary').value);
+    const claimAge = num($('laborClaimAge').value);
+    const legalAge = 65;
+    const diff = claimAge - legalAge;
+    let adjPct = 0;
+    if(diff > 0) adjPct = Math.min(diff,5)*4;
+    else if(diff < 0) adjPct = -Math.min(-diff,5)*4;
+    const adjFactor = 1 + adjPct/100;
+    const formulaA = salary*years*0.00775 + 3000;
+    const formulaB = salary*years*0.0155;
+    const base = Math.max(formulaA, formulaB);
+    const monthlyPension = base * adjFactor;
+    const haircut = num($('laborHaircut').value) / 100;
+
+    let laborTotal = 0;
+    if(laborMethod === 'pension'){
+      const ownAge = num($('planOwnAge').value);
+      const ownLE = num($('planOwnLE').value);
+      const yearsToRetire = num($('retireYears').value);
+      const retireAge = ownAge + yearsToRetire;
+      const survival = Math.max(0, ownLE - retireAge);
+      laborTotal = monthlyPension * haircut * 12 * survival;
+    } else {
+      let months = Math.min(years,15)*1 + Math.max(0, years-15)*2;
+      months = Math.min(months, 45);
+      const lumpAmount = salary * months;
+      laborTotal = lumpAmount * haircut;
+    }
+
+    const current = num($('planAvailAssets').value);
+    $('planAvailAssets').value = Math.round(current + laborTotal);
+    calcPlan();
+    flashMsg(`已將勞保估算 ${fmt(laborTotal)} 併入退休時可用資產`);
+  });
+
+  // ================= retirement funding plan (PART 5) =================
   let planBasis = 'quality';
   function calcPlan(){
     const ownAge = num($('planOwnAge').value);
@@ -1253,6 +1443,7 @@
       otherAsset:{ name:$('otherAssetName').value, value:$('otherAssetValue').value },
       retire:{ years:$('retireYears').value, inflation:$('retireInflation').value, cats: retireCats },
       plan:{ ownAge:$('planOwnAge').value, ownLE:$('planOwnLE').value, availAssets:$('planAvailAssets').value, basis: planBasis },
+      labor:{ years:$('laborYears').value, salary:$('laborSalary').value, claimAge:$('laborClaimAge').value, haircut:$('laborHaircut').value, method: laborMethod },
     };
   }
 
@@ -1315,8 +1506,19 @@
         b.classList.toggle('active', b.dataset.basis === planBasis);
       });
     }
+    if(s.labor){
+      $('laborYears').value = s.labor.years!==undefined?s.labor.years:20;
+      $('laborSalary').value = s.labor.salary!==undefined?s.labor.salary:45800;
+      $('laborClaimAge').value = s.labor.claimAge!==undefined?s.labor.claimAge:65;
+      $('laborHaircut').value = s.labor.haircut!==undefined?s.labor.haircut:100;
+      laborMethod = s.labor.method || 'pension';
+      $('laborMethodToggle').querySelectorAll('button').forEach(b=>{
+        b.classList.toggle('active', b.dataset.method === laborMethod);
+      });
+    }
     calc();
     calcRetire();
+    calcLabor();
     calcPlan();
   }
 
@@ -1465,6 +1667,16 @@
     retireCats = defaultRetireCats();
     renderRetireCategories();
     calcRetire();
+
+    $('laborYears').value = 20;
+    $('laborSalary').value = 45800;
+    $('laborClaimAge').value = 65;
+    $('laborHaircut').value = 100;
+    laborMethod = 'pension';
+    $('laborMethodToggle').querySelectorAll('button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.method === 'pension');
+    });
+    calcLabor();
 
     $('planOwnAge').value = 45;
     $('planOwnLE').value = 85;
