@@ -19,6 +19,8 @@
     --resp-soft:#F1E1DC;
     --asset:#3F6E64;
     --asset-soft:#DEEAE5;
+    --retire:#3B5C74;
+    --retire-soft:#DCE6EC;
     --line: rgba(18,40,63,0.14);
     --card:#FFFFFF;
   }
@@ -93,6 +95,11 @@
     background:var(--navy);color:#fff;border:none;border-radius:8px;
     padding:13px 14px;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;
     letter-spacing:.02em;
+  }
+  .manager-toggle{
+    display:block;width:100%;text-align:left;background:none;border:1px solid var(--line);
+    border-radius:8px;padding:10px 12px;font-family:inherit;font-size:12.5px;color:var(--ink-soft);
+    font-weight:600;cursor:pointer;margin-top:4px;
   }
   .client-manager{
     margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);
@@ -199,6 +206,44 @@
   .block.assets .grand-card{background:var(--asset);}
   .block.assets .grand-card .lbl{color:#DCEAE4;}
   .block.assets .grand-card .amt{color:#fff;}
+  .block.retirement .block-head .tag{background:var(--retire);}
+  .block.retirement .block-head h2{color:var(--retire);}
+  .block.retirement .add-btn{border-color:var(--retire);color:var(--retire);}
+  .block.retirement .grand-card{background:var(--retire);}
+  .block.retirement .grand-card .lbl{color:#D7E3EA;}
+  .block.retirement .grand-card .amt{color:#fff;}
+  .retire-settings-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:end;}
+  @media (max-width:640px){ .retire-settings-row{grid-template-columns:1fr 1fr;} }
+  .retire-multiplier-readout{
+    background:var(--retire-soft);border-radius:8px;padding:10px 12px;text-align:center;
+  }
+  .retire-multiplier-readout .l{font-size:11.5px;color:var(--ink-soft);}
+  .retire-multiplier-readout .v{font-family:'Noto Serif TC',serif;font-weight:700;font-size:19px;color:var(--retire);}
+  .retire-cat-card{border-left:3px solid var(--retire-soft);}
+  .retire-item-row{
+    display:grid;grid-template-columns:1.3fr .9fr auto auto;gap:10px;align-items:center;margin-bottom:10px;
+  }
+  @media (max-width:640px){ .retire-item-row{grid-template-columns:1fr 1fr;} .retire-item-row .essential-wrap, .retire-item-row button.rm{grid-column:span 1;} }
+  .retire-item-row .essential-wrap{
+    display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-soft);white-space:nowrap;
+  }
+  .retire-item-row .essential-wrap input{width:16px;height:16px;}
+  .retire-item-amt{
+    font-family:'Noto Serif TC',serif;font-size:12.5px;color:var(--ink-soft);white-space:nowrap;
+  }
+  .retire-cat-subtotal{
+    margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);
+    display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-soft);
+  }
+  .retire-cat-subtotal .amt{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--retire);}
+  .retire-total-split{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
+  @media (max-width:640px){ .retire-total-split{grid-template-columns:1fr;} }
+  .retire-total-card{border-radius:10px;padding:16px;}
+  .retire-total-card.basic{background:var(--paper-2);}
+  .retire-total-card.quality{background:var(--retire-soft);}
+  .retire-total-card .t{font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;}
+  .retire-total-card .v{font-family:'Noto Serif TC',serif;font-size:22px;font-weight:700;color:var(--ink);}
+  .retire-total-card .sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
 
   /* ---- Result / scale section ---- */
   .result-section{
@@ -266,7 +311,7 @@
   #printReport{display:none;}
   @media print{
     body *{visibility:hidden;}
-    .sticky-bar, .child-count-picker, .add-btn, .dyn-row button.rm, .print-btn-wrap, .client-manager, .sticky-save-btn{display:none !important;}
+    .sticky-bar, .child-count-picker, .add-btn, .dyn-row button.rm, .print-btn-wrap, .client-manager, .sticky-save-btn, .manager-toggle, .new-client-btn{display:none !important;}
     #printReport, #printReport *{visibility:visible;}
     #printReport{display:block;position:absolute;top:0;left:0;width:100%;padding:20px;}
   }
@@ -297,7 +342,8 @@
       <div class="field"><label>顧問姓名</label><input id="advisorName" placeholder="例：吳金津"></div>
       <div class="field"><label>試算日期</label><input id="reportDate" type="date"></div>
     </div>
-    <div class="client-manager">
+    <button type="button" class="manager-toggle" id="managerToggle">🔒 管理已儲存的客戶資料 ▾</button>
+    <div class="client-manager" id="clientManagerPanel" style="display:none;">
       <div class="field">
         <label>已儲存的客戶資料</label>
         <select id="clientSelect"><option value="">－ 選擇客戶 －</option></select>
@@ -446,6 +492,46 @@
     <div class="grand-card">
       <span class="lbl">資產總額</span>
       <span class="amt" id="assetGrand">NT$ 0</span>
+    </div>
+  </section>
+
+  <!-- ===================== 退休支出試算 ===================== -->
+  <section class="block retirement">
+    <div class="block-head">
+      <span class="tag">PART 3</span>
+      <h2>退休後首年月支出</h2>
+      <span class="note">退休後，每個月要花多少才夠？</span>
+    </div>
+
+    <div class="card">
+      <h3><span class="num">1</span>通膨與年期設定</h3>
+      <div class="retire-settings-row">
+        <div class="field"><label>距退休年數</label><input type="number" id="retireYears" value="10" min="0" max="60"></div>
+        <div class="field"><label>預估年通膨率（%）</label><input type="number" id="retireInflation" value="2" step="0.1" min="0" max="20"></div>
+        <div class="retire-multiplier-readout">
+          <div class="l">複利終值倍數</div>
+          <div class="v" id="retireMultiplierTxt">1.22 倍</div>
+        </div>
+      </div>
+      <div class="hint" style="margin-top:10px;">每個項目的「目前月支出」會依這個倍數自動換算成「退休後月支出」。有勾選「基本」的項目會被算進基本退休生活；全部項目則算進品質退休生活。</div>
+    </div>
+
+    <div id="retireCategoriesWrap"></div>
+
+    <div class="card">
+      <h3><span class="num">8</span>退休後首年月支出總計</h3>
+      <div class="retire-total-split">
+        <div class="retire-total-card basic">
+          <div class="t">基本退休生活（月）</div>
+          <div class="v" id="retireBasicMonthly">NT$ 0</div>
+          <div class="sub">年支出：<span id="retireBasicAnnual">NT$ 0</span></div>
+        </div>
+        <div class="retire-total-card quality">
+          <div class="t">品質退休生活（月）</div>
+          <div class="v" id="retireQualityMonthly">NT$ 0</div>
+          <div class="sub">年支出：<span id="retireQualityAnnual">NT$ 0</span></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -674,6 +760,129 @@
     renderRE(); calc();
   });
 
+  // ================= retirement expense module =================
+  const categoryOrder = ['food','cloth','home','transport','edu','leisure'];
+  const categoryLabels = {food:'食', cloth:'衣', home:'住', transport:'行', edu:'育', leisure:'樂'};
+  function defaultRetireCats(){
+    return {
+      food: [ {name:'外食支出', amount:0, essential:true}, {name:'食品採購', amount:0, essential:true} ],
+      cloth: [ {name:'置裝洗衣', amount:0, essential:true}, {name:'美容理髮', amount:0, essential:false} ],
+      home: [ {name:'房租房貸', amount:0, essential:true}, {name:'水電瓦斯', amount:0, essential:true}, {name:'管理費', amount:0, essential:true}, {name:'電話通訊', amount:0, essential:true} ],
+      transport: [ {name:'油錢保養', amount:0, essential:true}, {name:'停車洗車', amount:0, essential:false}, {name:'車資', amount:0, essential:true} ],
+      edu: [ {name:'進修成長', amount:0, essential:false}, {name:'家教安親', amount:0, essential:false} ],
+      leisure: [ {name:'雜誌視聽', amount:0, essential:false}, {name:'旅遊度假', amount:0, essential:false}, {name:'社交聚餐', amount:0, essential:false} ],
+    };
+  }
+  let retireCats = defaultRetireCats();
+
+  function syncRetireFromDom(){
+    const wrap = $('retireCategoriesWrap');
+    if(!wrap) return;
+    wrap.querySelectorAll('.retire-cat-card').forEach(card=>{
+      const cat = card.dataset.cat;
+      const items = [];
+      card.querySelectorAll('.retire-item-row').forEach(row=>{
+        items.push({
+          name: row.querySelector('.ri-name').value,
+          amount: row.querySelector('.ri-amount').value,
+          essential: row.querySelector('.ri-essential').checked,
+        });
+      });
+      retireCats[cat] = items;
+    });
+  }
+
+  function renderRetireCategories(){
+    const wrap = $('retireCategoriesWrap');
+    wrap.innerHTML = '';
+    let n = 2;
+    categoryOrder.forEach(key=>{
+      const card = document.createElement('div');
+      card.className = 'card retire-cat-card';
+      card.dataset.cat = key;
+      let itemsHtml = '';
+      (retireCats[key]||[]).forEach((item, idx)=>{
+        itemsHtml += `
+          <div class="retire-item-row" data-idx="${idx}">
+            <div class="field"><input type="text" class="ri-name" value="${item.name}" placeholder="項目名稱"></div>
+            <div class="field"><input type="number" class="ri-amount" value="${item.amount}" step="500" min="0" placeholder="目前月支出"></div>
+            <label class="essential-wrap"><input type="checkbox" class="ri-essential" ${item.essential?'checked':''}> 基本</label>
+            <button type="button" class="rm" title="移除">×</button>
+          </div>`;
+      });
+      card.innerHTML = `
+        <h3><span class="num">${n}</span>${categoryLabels[key]}</h3>
+        <div class="retire-items-list">${itemsHtml}</div>
+        <button class="add-btn add-retire-item" type="button" data-cat="${key}">＋ 新增${categoryLabels[key]}項目</button>
+        <div class="retire-cat-subtotal">
+          <span>退休後月支出（此類別）</span>
+          <span class="amt cat-subtotal-amt">NT$ 0</span>
+        </div>`;
+      wrap.appendChild(card);
+      n++;
+    });
+
+    wrap.querySelectorAll('.retire-item-row input').forEach(inp=>{
+      inp.addEventListener('input', calcRetire);
+    });
+    wrap.querySelectorAll('.rm').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const row = e.target.closest('.retire-item-row');
+        const card = e.target.closest('.retire-cat-card');
+        const cat = card.dataset.cat;
+        const idx = parseInt(row.dataset.idx, 10);
+        syncRetireFromDom();
+        retireCats[cat].splice(idx, 1);
+        if(retireCats[cat].length===0) retireCats[cat] = [{name:'', amount:0, essential:false}];
+        renderRetireCategories();
+        calcRetire();
+      });
+    });
+    wrap.querySelectorAll('.add-retire-item').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const cat = btn.dataset.cat;
+        syncRetireFromDom();
+        retireCats[cat].push({name:'', amount:0, essential:false});
+        renderRetireCategories();
+        calcRetire();
+      });
+    });
+  }
+
+  function calcRetire(){
+    syncRetireFromDom();
+    const years = num($('retireYears').value);
+    const infl = num($('retireInflation').value) / 100;
+    const multiplier = Math.pow(1 + infl, years);
+    $('retireMultiplierTxt').textContent = multiplier.toFixed(2) + ' 倍';
+
+    let basicMonthly = 0, qualityMonthly = 0;
+    const wrap = $('retireCategoriesWrap');
+    wrap.querySelectorAll('.retire-cat-card').forEach(card=>{
+      const cat = card.dataset.cat;
+      let catTotal = 0;
+      (retireCats[cat]||[]).forEach(item=>{
+        const amt = (parseFloat(item.amount) || 0) * multiplier;
+        catTotal += amt;
+        qualityMonthly += amt;
+        if(item.essential) basicMonthly += amt;
+      });
+      const subEl = card.querySelector('.cat-subtotal-amt');
+      if(subEl) subEl.textContent = fmt(catTotal);
+    });
+
+    $('retireBasicMonthly').textContent = fmt(basicMonthly);
+    $('retireBasicAnnual').textContent = fmt(basicMonthly * 12);
+    $('retireQualityMonthly').textContent = fmt(qualityMonthly);
+    $('retireQualityAnnual').textContent = fmt(qualityMonthly * 12);
+
+    scheduleAutoSave();
+  }
+
+  $('retireYears').addEventListener('input', calcRetire);
+  $('retireInflation').addEventListener('input', calcRetire);
+  renderRetireCategories();
+
   // ================= main calc =================
   function calc(){
     // spouse
@@ -802,6 +1011,7 @@
   renderLoans();
   renderRE();
   calc();
+  calcRetire();
 
   $('reportDate').value = new Date().toISOString().slice(0,10);
 
@@ -809,6 +1019,7 @@
   function gatherState(){
     syncLoanRowsFromDom();
     syncReRowsFromDom();
+    syncRetireFromDom();
     const children = [];
     document.querySelectorAll('.child-card').forEach(card=>{
       children.push({
@@ -836,6 +1047,7 @@
       },
       realEstate: reRows,
       otherAsset:{ name:$('otherAssetName').value, value:$('otherAssetValue').value },
+      retire:{ years:$('retireYears').value, inflation:$('retireInflation').value, cats: retireCats },
     };
   }
 
@@ -884,7 +1096,13 @@
       $('otherAssetName').value = s.otherAsset.name||'';
       $('otherAssetValue').value = s.otherAsset.value||0;
     }
+    if(s.retire){
+      $('retireYears').value = s.retire.years!==undefined?s.retire.years:10;
+      $('retireInflation').value = s.retire.inflation!==undefined?s.retire.inflation:2;
+      if(s.retire.cats){ retireCats = s.retire.cats; renderRetireCategories(); }
+    }
     calc();
+    calcRetire();
   }
 
   function loadStore(){
@@ -966,11 +1184,21 @@
   $('deleteBtn').addEventListener('click', ()=>{
     const name = $('clientSelect').value;
     if(!name){ flashMsg('請先選擇要刪除的客戶'); return; }
+    const typed = window.prompt(`此動作無法復原。\n\n請在下方輸入「${name}」以確認刪除這筆客戶資料：`);
+    if(typed === null) return; // cancelled
+    if(typed.trim() !== name){ flashMsg('輸入不符，已取消刪除'); return; }
     const store = loadStore();
     delete store[name];
     saveStore(store);
     refreshClientSelect();
     flashMsg(`已刪除「${name}」的資料`);
+  });
+
+  $('managerToggle').addEventListener('click', ()=>{
+    const panel = $('clientManagerPanel');
+    const open = panel.style.display !== 'none';
+    panel.style.display = open ? 'none' : 'flex';
+    $('managerToggle').textContent = open ? '🔒 管理已儲存的客戶資料 ▾' : '🔓 管理已儲存的客戶資料 ▴';
   });
 
   function resetForm(){
@@ -1016,6 +1244,12 @@
 
     $('otherAssetName').value = '';
     $('otherAssetValue').value = 0;
+
+    $('retireYears').value = 10;
+    $('retireInflation').value = 2;
+    retireCats = defaultRetireCats();
+    renderRetireCategories();
+    calcRetire();
 
     $('clientSelect').value = '';
     calc();
@@ -1109,6 +1343,22 @@
 
     const gap = respGrand - assetGrand;
 
+    syncRetireFromDom();
+    const rYears = num($('retireYears').value);
+    const rInfl = num($('retireInflation').value) / 100;
+    const rMultiplier = Math.pow(1 + rInfl, rYears);
+    let retireBasic = 0, retireQuality = 0, retireCatRows = '';
+    categoryOrder.forEach(key=>{
+      let catTotal = 0;
+      (retireCats[key]||[]).forEach(item=>{
+        const amt = (parseFloat(item.amount)||0) * rMultiplier;
+        catTotal += amt;
+        retireQuality += amt;
+        if(item.essential) retireBasic += amt;
+      });
+      if(catTotal>0) retireCatRows += `<div class="pr-row"><span>${categoryLabels[key]}</span><span>${fmt(catTotal)}</span></div>`;
+    });
+
     $('printReport').innerHTML = `
       <div class="pr-title">家庭責任缺口分析報告</div>
       <div class="pr-meta">要保人／被保險人：${clientName}　｜　顧問：${advisorName}　｜　日期：${date}</div>
@@ -1133,6 +1383,13 @@
         ${reRowsHtml}
         <div class="pr-row"><span>${otherAssetName}</span><span>${fmt(otherAssetValue)}</span></div>
         <div class="pr-total"><span>資產總額</span><span>${fmt(assetGrand)}</span></div>
+      </div>
+
+      <div class="pr-section">
+        <h4>三、退休後首年月支出（距退休 ${rYears} 年，通膨 ${(rInfl*100).toFixed(1)}%，倍數 ${rMultiplier.toFixed(2)}）</h4>
+        ${retireCatRows}
+        <div class="pr-row"><span>基本退休生活（月／年）</span><span>${fmt(retireBasic)} ／ ${fmt(retireBasic*12)}</span></div>
+        <div class="pr-total"><span>品質退休生活（月／年）</span><span>${fmt(retireQuality)} ／ ${fmt(retireQuality*12)}</span></div>
       </div>
 
       <div class="pr-gap">
